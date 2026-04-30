@@ -1,0 +1,64 @@
+{
+  "holdings": [
+    {
+      "id": "h1",
+      "stockCode": "BBCA.JK",
+      "stockName": "Bank Central Asia",
+      "quantity": 100,
+      "avgBuyPrice": 8500,
+      "buyDate": "2024-06-15",
+      "notes": "Long term hold",
+      "isActive": true
+    },
+    {
+      "id": "h2",
+      "stockCode": "BBRI.JK",
+      "stockName": "Bank Rakyat Indonesia",
+      "quantity": 200,
+      "avgBuyPrice": 4800,
+      "buyDate": "2024-07-20",
+      "notes": "Dividend play",
+      "isActive": true
+    },
+    {
+      "id": "h3",
+      "stockCode": "TLKM.JK",
+      "stockName": "Telkom Indonesia",
+      "quantity": 500,
+      "avgBuyPrice": 3200,
+      "buyDate": "2024-08-10",
+      "notes": "",
+      "isActive": true
+    },
+    {
+      "id": "h4",
+      "stockCode": "ASII.JK",
+      "stockName": "Astra International",
+      "quantity": 150,
+      "avgBuyPrice": 5400,
+      "buyDate": "2024-09-05",
+      "notes": "Automotive recovery",
+      "isActive": true
+    },
+    {
+      "id": "h5",
+      "stockCode": "ADRO.JK",
+      "stockName": "Adaro Energy",
+      "quantity": 300,
+      "avgBuyPrice": 2800,
+      "buyDate": "2024-10-12",
+      "notes": "Commodity exposure",
+      "isActive": true
+    },
+    {
+      "id": "h6",
+      "stockCode": "KLBF.JK",
+      "stockName": "Kalbe Farma",
+      "quantity": 400,
+      "avgBuyPrice": 1550,
+      "buyDate": "2024-11-01",
+      "notes": "Healthcare sector",
+      "isActive": true
+    }
+  ]
+}
