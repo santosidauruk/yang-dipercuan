@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { NextResponse } from 'next/server'
 import { getHistoricalData } from '@/lib/yahoo-finance'
 import type { OHLCV } from '@/types'

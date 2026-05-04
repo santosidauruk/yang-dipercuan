@@ -3,7 +3,7 @@
 import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { ThemeProvider } from 'next-themes'
 import { TooltipProvider } from '@/components/ui/tooltip'
-import { useState, useEffect } from 'react'
+import { useState } from 'react'
 
 export function Providers({ children }: { children: React.ReactNode }) {
   const [queryClient] = useState(
@@ -17,20 +17,6 @@ export function Providers({ children }: { children: React.ReactNode }) {
         }
       })
   )
-
-  const [mswReady, setMswReady] = useState(false)
-
-  useEffect(() => {
-    if (process.env.NODE_ENV === 'development') {
-      import('@/mocks').then(({ initMocks }) =>
-        initMocks().then(() => setMswReady(true))
-      )
-    } else {
-      setMswReady(true)
-    }
-  }, [])
-
-  if (!mswReady) return null
 
   return (
     <QueryClientProvider client={queryClient}>
