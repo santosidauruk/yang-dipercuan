@@ -94,7 +94,7 @@ export function Holdings({ holdings, onEdit }: Props) {
       <CardHeader>
         <CardTitle>Holdings</CardTitle>
       </CardHeader>
-      <CardContent className="p-0">
+      <CardContent className="p-0 px-4">
         <Table>
           <TableHeader>
             <TableRow>
