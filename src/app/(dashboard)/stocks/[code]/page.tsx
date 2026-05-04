@@ -1,7 +1,7 @@
 'use client'
 
 import { use } from 'react'
-import { useStockDetail, useStockHistory } from '@/hooks/useStocks'
+import { useStockHistory } from '@/hooks/useStocks'
 import { useStockStore } from '@/stores/useStockStore'
 import { TIMEFRAMES } from '@/lib/constants'
 import { StockDetailCard } from '@/components/stocks/StockDetail'
@@ -48,11 +48,11 @@ export default function StockDetailPage({
       {/* Back + Watchlist */}
       <div className="flex items-center justify-between">
         <Link
-          href="/stocks"
+          href="/portfolio"
           className="text-muted-foreground hover:text-foreground inline-flex items-center gap-1 text-sm"
         >
           <ArrowLeft className="h-4 w-4" />
-          Back to Stocks
+          Back
         </Link>
         <WatchlistButton stockCode={symbol} />
       </div>

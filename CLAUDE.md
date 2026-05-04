@@ -71,3 +71,17 @@ Three coexisting layers — pick the right one:
 ## Docs
 
 Longer-form context lives in [docs/frontend-implementation-plan.md](docs/frontend-implementation-plan.md), [docs/frontend-stack-decisions.md](docs/frontend-stack-decisions.md), and [docs/pages-implementation-guide.md](docs/pages-implementation-guide.md). The repo-root [../docs/](../docs/) folder has backend architecture decisions for when that work begins.
+
+## Agent skills
+
+### Issue tracker
+
+GitHub Issues at `santosidauruk/yang-dipercuan` via `gh` CLI. See [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md).
+
+### Triage labels
+
+Five canonical labels, default vocabulary. See [docs/agents/triage-labels.md](docs/agents/triage-labels.md).
+
+### Domain docs
+
+Single-context layout — `CONTEXT.md` + `docs/adr/` at frontend root. See [docs/agents/domain.md](docs/agents/domain.md).

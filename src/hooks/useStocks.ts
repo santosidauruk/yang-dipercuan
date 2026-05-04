@@ -1,23 +1,11 @@
 import { useQuery } from '@tanstack/react-query'
 import { fetchApi } from '@/lib/api'
-import type {
-  Stock,
-  StockDetail,
-  OHLCV,
-  StockSearchResult
-} from '@/types'
+import type { Stock, StockDetail, OHLCV, StockSearchResult } from '@/types'
 
 export interface RealtimeQueryOptions {
   refetchInterval?: number
   refetchIntervalInBackground?: boolean
   gcTime?: number
-}
-export function useStocks(sector?: string) {
-  return useQuery<Stock[]>({
-    queryKey: ['stocks', sector],
-    queryFn: () => fetchApi(`/api/stocks${sector ? `?sector=${sector}` : ''}`),
-    refetchInterval: 30_000
-  })
 }
 
 export function useStocksPrices(codes: string[]) {

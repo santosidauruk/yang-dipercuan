@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server'
 import { getQuote } from '@/lib/yahoo-finance'
-import { IDX_STOCKS } from '@/lib/constants'
 import type { StockDetail } from '@/types'
 
 export const revalidate = 30
@@ -20,12 +19,10 @@ export async function GET(
       return NextResponse.json({ error: 'Stock not found' }, { status: 404 })
     }
 
-    const info = IDX_STOCKS.find((s) => s.code === symbol)
-
     const stock: StockDetail = {
       code: quote.symbol,
-      name: info?.name ?? quote.shortName ?? quote.longName ?? symbol,
-      sector: info?.sector ?? 'Unknown',
+      name: quote.shortName ?? quote.longName ?? symbol,
+      sector: 'Unknown',
       price: quote.regularMarketPrice,
       previousClose: quote.regularMarketPreviousClose ?? 0,
       change: quote.regularMarketChange ?? 0,

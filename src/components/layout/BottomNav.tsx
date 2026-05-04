@@ -4,21 +4,19 @@ import Link from 'next/link'
 import { usePathname } from 'next/navigation'
 import { cn } from '@/lib/utils'
 import {
-  LayoutDashboard,
-  BarChart3,
   Briefcase,
-  Star,
-  MessageSquare,
-  Settings
+  ShoppingCart,
+  Receipt,
+  Coins,
+  Star
 } from 'lucide-react'
 
 const navItems = [
-  { href: '/dashboard', label: 'Dashboard', icon: LayoutDashboard },
-  { href: '/stocks', label: 'Stocks', icon: BarChart3 },
   { href: '/portfolio', label: 'Portfolio', icon: Briefcase },
-  { href: '/recommendations', label: 'Recommendations', icon: Star },
-  { href: '/chat', label: 'AI Chat', icon: MessageSquare },
-  { href: '/settings', label: 'Settings', icon: Settings }
+  { href: '/purchases', label: 'Purchases', icon: ShoppingCart },
+  { href: '/sales', label: 'Sales', icon: Receipt },
+  { href: '/dividends', label: 'Dividends', icon: Coins },
+  { href: '/watchlist', label: 'Watchlist', icon: Star }
 ]
 
 export function BottomNav() {

@@ -15,9 +15,9 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'StockIDX - Personal Stock Tracker',
+  title: 'Yang Dipercuan',
   description:
-    'Track Indonesian stocks, manage your portfolio, and get AI-powered insights'
+    'Personal IDX stock portfolio tracker. Browser-only data, Yahoo Finance for market quotes.'
 }
 
 export default function RootLayout({
