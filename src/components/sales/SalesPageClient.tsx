@@ -1,0 +1,196 @@
+'use client'
+
+import { useMemo, useState } from 'react'
+import { Plus, ArrowDownAZ, CalendarArrowDown } from 'lucide-react'
+import { toast } from 'sonner'
+import { Button } from '@/components/ui/button'
+import {
+  DropdownMenu,
+  DropdownMenuCheckboxItem,
+  DropdownMenuContent,
+  DropdownMenuLabel,
+  DropdownMenuSeparator,
+  DropdownMenuTrigger
+} from '@/components/ui/dropdown-menu'
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue
+} from '@/components/ui/select'
+import { usePurchases } from '@/stores/usePurchases'
+import { useSales } from '@/stores/useSales'
+import { qty } from '@/lib/portfolio'
+import { SaleFormDialog, type SaleFormValues } from './SaleFormDialog'
+import { SalesTable } from './SalesTable'
+import type { Sale } from '@/types'
+
+type SortKey = 'date-desc' | 'code-asc'
+
+export function SalesPageClient() {
+  const purchases = usePurchases((s) => s.purchases)
+  const sales = useSales((s) => s.sales)
+  const addSale = useSales((s) => s.addSale)
+  const updateSale = useSales((s) => s.updateSale)
+  const removeSale = useSales((s) => s.removeSale)
+
+  const [dialogOpen, setDialogOpen] = useState(false)
+  const [editing, setEditing] = useState<Sale | undefined>(undefined)
+  const [filterCodes, setFilterCodes] = useState<string[]>([])
+  const [sortKey, setSortKey] = useState<SortKey>('date-desc')
+
+  const uniqueCodes = useMemo(
+    () => Array.from(new Set(sales.map((s) => s.code))).sort(),
+    [sales]
+  )
+
+  const filtered = useMemo(() => {
+    const rows =
+      filterCodes.length === 0
+        ? sales
+        : sales.filter((s) => filterCodes.includes(s.code))
+
+    return [...rows].sort((a, b) =>
+      sortKey === 'date-desc'
+        ? b.date.localeCompare(a.date)
+        : a.code.localeCompare(b.code)
+    )
+  }, [sales, filterCodes, sortKey])
+
+  const openAdd = () => {
+    setEditing(undefined)
+    setDialogOpen(true)
+  }
+  const openEdit = (sale: Sale) => {
+    setEditing(sale)
+    setDialogOpen(true)
+  }
+
+  const handleSubmit = (values: SaleFormValues) => {
+    if (editing) {
+      updateSale(editing.id, values)
+      toast.success(`${values.code} updated`)
+    } else {
+      const heldLots = qty(purchases, sales, values.code) / 100
+      if (values.lots > heldLots) {
+        toast.warning(
+          `Selling ${values.lots} lots but only ${heldLots} held for ${values.code}`
+        )
+      }
+      addSale(values)
+      toast.success(`${values.code} sale recorded`)
+    }
+  }
+
+  const handleDelete = (sale: Sale) => {
+    if (confirm(`Delete sale ${sale.code} on ${sale.date}? This cannot be undone.`)) {
+      removeSale(sale.id)
+      toast.success(`${sale.code} sale deleted`)
+    }
+  }
+
+  const handleDeleteAll = () => {
+    if (sales.length === 0) return
+    if (confirm(`Delete all ${sales.length} sale records? This cannot be undone.`)) {
+      sales.forEach((s) => removeSale(s.id))
+      toast.success('All sales deleted')
+    }
+  }
+
+  const toggleFilter = (code: string) => {
+    setFilterCodes((cur) =>
+      cur.includes(code) ? cur.filter((c) => c !== code) : [...cur, code]
+    )
+  }
+
+  return (
+    <div className="space-y-4">
+      <div className="flex items-center justify-between">
+        <div>
+          <h1 className="text-2xl font-bold">Sales</h1>
+          <p className="text-muted-foreground text-sm">
+            Track every sell. Cost basis auto-filled from purchase average.
+          </p>
+        </div>
+        <div className="flex gap-2">
+          {sales.length > 0 && (
+            <Button variant="outline" onClick={handleDeleteAll}>
+              Delete All
+            </Button>
+          )}
+          <Button onClick={openAdd}>
+            <Plus className="h-4 w-4" />
+            Add
+          </Button>
+        </div>
+      </div>
+
+      <div className="flex flex-wrap items-center gap-2">
+        <DropdownMenu>
+          <DropdownMenuTrigger asChild>
+            <Button
+              variant="outline"
+              size="sm"
+              disabled={uniqueCodes.length === 0}
+            >
+              <ArrowDownAZ className="h-4 w-4" />
+              Filter
+              {filterCodes.length > 0 && (
+                <span className="ml-1 text-xs">({filterCodes.length})</span>
+              )}
+            </Button>
+          </DropdownMenuTrigger>
+          <DropdownMenuContent align="start">
+            <DropdownMenuLabel>Filter by code</DropdownMenuLabel>
+            <DropdownMenuSeparator />
+            {uniqueCodes.map((code) => (
+              <DropdownMenuCheckboxItem
+                key={code}
+                checked={filterCodes.includes(code)}
+                onCheckedChange={() => toggleFilter(code)}
+                onSelect={(e) => e.preventDefault()}
+              >
+                {code}
+              </DropdownMenuCheckboxItem>
+            ))}
+            {filterCodes.length > 0 && (
+              <>
+                <DropdownMenuSeparator />
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  className="w-full justify-start"
+                  onClick={() => setFilterCodes([])}
+                >
+                  Clear
+                </Button>
+              </>
+            )}
+          </DropdownMenuContent>
+        </DropdownMenu>
+
+        <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+          <SelectTrigger size="sm" className="w-45">
+            <CalendarArrowDown className="mr-1 h-4 w-4" />
+            <SelectValue />
+          </SelectTrigger>
+          <SelectContent>
+            <SelectItem value="date-desc">Date (newest first)</SelectItem>
+            <SelectItem value="code-asc">Code (A→Z)</SelectItem>
+          </SelectContent>
+        </Select>
+      </div>
+
+      <SalesTable sales={filtered} onEdit={openEdit} onDelete={handleDelete} />
+
+      <SaleFormDialog
+        open={dialogOpen}
+        onOpenChange={setDialogOpen}
+        initial={editing}
+        purchases={purchases}
+        onSubmit={handleSubmit}
+      />
+    </div>
+  )
+}
