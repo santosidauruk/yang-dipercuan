@@ -36,6 +36,12 @@ export async function getHistoricalData(
   return result
 }
 
+export async function getProfile(symbol: string): Promise<any> {
+  return await yahooFinance.quoteSummary(symbol, {
+    modules: ['price', 'assetProfile']
+  })
+}
+
 export async function searchStocks(query: string): Promise<any> {
   return await yahooFinance.search(query, {
     newsCount: 0,
