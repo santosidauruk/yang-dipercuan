@@ -23,3 +23,8 @@ export interface Dividend {
   code: string
   dps: number
 }
+
+export interface WatchlistItem {
+  code: string
+  addedAt: string
+}
