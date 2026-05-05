@@ -1,5 +1,15 @@
 import { describe, it, expect } from 'vitest'
-import { qty, avgCost, costBasisAt, realizedPL, dividendRow, dividendTotal } from './portfolio'
+import {
+  qty,
+  avgCost,
+  costBasisAt,
+  realizedPL,
+  dividendRow,
+  dividendTotal,
+  holdings,
+  summary,
+  allocations
+} from './portfolio'
 import type { Purchase, Sale, Dividend } from '@/types'
 
 const buy = (
@@ -187,5 +197,144 @@ describe('dividendTotal', () => {
     ]
     // BBCA only: 50*1000 = 50000
     expect(dividendTotal(purchases, [], dividends, 'BBCA')).toBe(50000)
+  })
+})
+
+describe('holdings', () => {
+  it('returns [] when no purchases', () => {
+    expect(holdings([], [])).toEqual([])
+  })
+
+  it('builds a single holding from one purchase', () => {
+    const purchases = [buy('BBCA', '2026-01-01', 5, 9000)]
+    expect(holdings(purchases, [])).toEqual([
+      {
+        code: 'BBCA',
+        lots: 5,
+        shares: 500,
+        avgCost: 9000,
+        invested: 4_500_000
+      }
+    ])
+  })
+
+  it('reduces lots and shares by partial sales', () => {
+    const purchases = [buy('BBCA', '2026-01-01', 10, 9000)]
+    const sales = [sell('BBCA', '2026-02-01', 3, 9500, 9000)]
+    const [h] = holdings(purchases, sales)
+    expect(h.lots).toBe(7)
+    expect(h.shares).toBe(700)
+    expect(h.invested).toBe(9000 * 700)
+  })
+
+  it('excludes fully-sold codes', () => {
+    const purchases = [buy('BBCA', '2026-01-01', 5, 9000)]
+    const sales = [sell('BBCA', '2026-02-01', 5, 9500, 9000)]
+    expect(holdings(purchases, sales)).toEqual([])
+  })
+
+  it('returns multiple holdings sorted by code asc', () => {
+    const purchases = [
+      buy('PGAS', '2026-01-01', 5, 1500),
+      buy('BBCA', '2026-01-01', 4, 9000),
+      buy('ANTM', '2026-01-01', 2, 2000)
+    ]
+    expect(holdings(purchases, []).map((h) => h.code)).toEqual([
+      'ANTM',
+      'BBCA',
+      'PGAS'
+    ])
+  })
+})
+
+describe('summary', () => {
+  it('returns all zeros for empty inputs', () => {
+    expect(summary([], [], [], {})).toEqual({
+      totalInvested: 0,
+      totalCurrentValue: 0,
+      unrealizedPL: 0,
+      realizedGain: 0,
+      totalDividends: 0,
+      netCapitalChange: 0
+    })
+  })
+
+  it('aggregates per PRD §5.2: netCapitalChange = unrealizedPL + realizedPL + dividends', () => {
+    const purchases = [buy('BBCA', '2026-01-01', 10, 9000)]
+    const sales = [sell('BBCA', '2026-02-01', 3, 10_000, 9000)]
+    const dividends = [div('BBCA', '2026-03-01', 50)]
+    const prices = { BBCA: 11_000 }
+
+    expect(summary(purchases, sales, dividends, prices)).toEqual({
+      totalInvested: 6_300_000, // 700 shares * 9000
+      totalCurrentValue: 7_700_000, // 700 * 11000
+      unrealizedPL: 1_400_000,
+      realizedGain: 300_000, // 3 * 100 * (10000-9000)
+      totalDividends: 35_000, // 50 * 700
+      netCapitalChange: 1_735_000
+    })
+  })
+
+  it('treats missing prices as 0 (current value contribution)', () => {
+    const purchases = [buy('BBCA', '2026-01-01', 5, 9000)]
+    const result = summary(purchases, [], [], {})
+    expect(result.totalCurrentValue).toBe(0)
+    expect(result.unrealizedPL).toBe(-result.totalInvested)
+  })
+})
+
+describe('allocations', () => {
+  it('returns [] when no holdings', () => {
+    expect(allocations([], {}, {}, 'issuer')).toEqual([])
+  })
+
+  it('issuer mode: one entry per held code with marketValue + pct', () => {
+    const hs = holdings(
+      [buy('BBCA', '2026-01-01', 5, 9000), buy('PGAS', '2026-01-01', 10, 1500)],
+      []
+    )
+    const prices = { BBCA: 10000, PGAS: 2000 }
+    // BBCA mv = 500*10000 = 5_000_000; PGAS mv = 1000*2000 = 2_000_000; total = 7_000_000
+    const result = allocations(hs, prices, {}, 'issuer')
+    expect(result).toEqual([
+      { label: 'BBCA', value: 5_000_000, pct: (5_000_000 / 7_000_000) * 100 },
+      { label: 'PGAS', value: 2_000_000, pct: (2_000_000 / 7_000_000) * 100 }
+    ])
+  })
+
+  it('sector mode: groups market value by meta sector', () => {
+    const hs = holdings(
+      [
+        buy('BBCA', '2026-01-01', 5, 9000),
+        buy('BMRI', '2026-01-01', 5, 5000),
+        buy('PGAS', '2026-01-01', 10, 1500)
+      ],
+      []
+    )
+    const prices = { BBCA: 10000, BMRI: 6000, PGAS: 2000 }
+    const meta = {
+      BBCA: { name: 'Bank Central Asia', sector: 'Financial Services' },
+      BMRI: { name: 'Bank Mandiri', sector: 'Financial Services' },
+      PGAS: { name: 'Perusahaan Gas Negara', sector: 'Energy' }
+    }
+    // Financial Services = 5_000_000 + 3_000_000 = 8_000_000
+    // Energy = 2_000_000
+    const result = allocations(hs, prices, meta, 'sector')
+    const total = 10_000_000
+    expect(result).toEqual([
+      {
+        label: 'Financial Services',
+        value: 8_000_000,
+        pct: (8_000_000 / total) * 100
+      },
+      { label: 'Energy', value: 2_000_000, pct: (2_000_000 / total) * 100 }
+    ])
+  })
+
+  it('sector mode: codes without meta entry bucket as "Unknown"', () => {
+    const hs = holdings([buy('XYZA', '2026-01-01', 5, 1000)], [])
+    const prices = { XYZA: 1500 }
+    const result = allocations(hs, prices, {}, 'sector')
+    expect(result).toEqual([{ label: 'Unknown', value: 750_000, pct: 100 }])
   })
 })

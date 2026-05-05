@@ -15,11 +15,15 @@ npm run dev          # Next.js dev server on :3000
 npm run build        # production build
 npm run start        # serve production build
 npm run lint         # eslint (eslint-config-next + TS)
+npm run tsc          # typecheck (no emit)
+npm run test         # vitest run (jsdom, RTL + jest-dom)
+npm run test:watch   # vitest watch
+npm run validate     # lint + tsc + test
 npm run format       # prettier --write .
 npm run format:check # prettier --check .
 ```
 
-There are **no tests** in this codebase yet — do not invent a test command.
+Tests live alongside source as `*.test.ts(x)`. RTL component tests prefer integration over implementation — render the page client with a `QueryClient`, seed the Zustand stores directly, mock `globalThis.fetch`, and assert visible text.
 
 ## Environment
 
