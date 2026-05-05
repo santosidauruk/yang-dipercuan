@@ -18,6 +18,18 @@ export function useStocksPrices(codes: string[]) {
   })
 }
 
+export type StockQuote = { price: number; changePercent: number }
+
+export function useStocksQuotes(codes: string[]) {
+  const codeParams = codes.join(',')
+  return useQuery<Record<string, StockQuote>>({
+    queryKey: ['stock-quotes', codes],
+    queryFn: () => fetchApi(`/api/stocks/quotes?codes=${codeParams}`),
+    enabled: !!codeParams,
+    refetchInterval: 30_000
+  })
+}
+
 export function useStockDetail(
   code: string,
   options: RealtimeQueryOptions = {
