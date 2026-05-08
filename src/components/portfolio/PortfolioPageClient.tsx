@@ -16,6 +16,7 @@ import { SummaryCard } from './SummaryCard'
 import { HoldingsTable, type HoldingRow } from './HoldingsTable'
 import { AllocationDonut } from './AllocationDonut'
 import { HoldingDrillDown } from './HoldingDrillDown'
+import { PerformanceChart } from './PerformanceChart'
 
 export function PortfolioPageClient() {
   const purchases = usePurchases((s) => s.purchases)
@@ -99,6 +100,7 @@ export function PortfolioPageClient() {
         mode={allocMode}
         onModeChange={setAllocMode}
       />
+      <PerformanceChart purchases={purchases} sales={sales} />
       <HoldingsTable
         rows={rows}
         renderDrillDown={(code) => (
