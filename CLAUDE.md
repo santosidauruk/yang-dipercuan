@@ -85,6 +85,7 @@ Vitest + jsdom + `@testing-library/react`. Config: [vitest.config.ts](vitest.con
 
 - **Store tests** (`src/stores/*.test.ts`) — call `setState` to reset, `localStorage.clear()` in `beforeEach`. Spy on `Storage.prototype.setItem` to assert the persist key.
 - **Component tests** (`src/components/<domain>/*.test.tsx`) — wrap render in `<QueryClientProvider client={new QueryClient({defaultOptions:{queries:{retry:false}}})}>`. Stub `fetch` with `vi.stubGlobal('fetch', mockFn)` and dispatch on URL. Use `data-testid="<domain>-row-<code>"` + `data-testid="remove-<code>"` style hooks for stable selectors. Reset stores in `beforeEach`.
+- **Dynamic-route page tests** — pages use `use(params)` (React 19 client) which suspends in jsdom and stalls `findBy*`. Extract page body into a `<DomainPageClient code={code} />` under `src/components/<domain>/` and test that directly with plain props. The `app/.../page.tsx` becomes a thin `use(params)` → `<DomainPageClient>` wrapper.
 
 Run a single file: `npx vitest run src/stores/useWatchlist.test.ts`.
 
