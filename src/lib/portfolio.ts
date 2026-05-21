@@ -172,6 +172,26 @@ export function allocations(
   return out
 }
 
+export function wouldCauseNegativeQty(
+  purchases: Purchase[],
+  sales: Sale[],
+  editedId: string,
+  patch: Partial<Omit<Purchase, 'id'>>
+): boolean {
+  const orig = purchases.find((p) => p.id === editedId)
+  if (!orig) return false
+  const updated: Purchase = { ...orig, ...patch }
+  const next = purchases.map((p) => (p.id === editedId ? updated : p))
+  const codes = new Set([orig.code, updated.code])
+  for (const code of codes) {
+    const dates = sales.filter((s) => s.code === code).map((s) => s.date)
+    for (const d of dates) {
+      if (qty(next, sales, code, d) < 0) return true
+    }
+  }
+  return false
+}
+
 export function dividendTotal(
   purchases: Purchase[],
   sales: Sale[],

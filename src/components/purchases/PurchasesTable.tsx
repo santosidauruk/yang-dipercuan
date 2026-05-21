@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { formatCompactNumber, formatPercentage } from '@/lib/utils'
+import { formatNumber, formatPercentage } from '@/lib/utils'
 import { formatDateDisplay } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import type { Purchase } from '@/types'
@@ -67,24 +67,26 @@ export function PurchasesTable({
                 <TableCell>{formatDateDisplay(p.date)}</TableCell>
                 <TableCell className="font-medium">{p.code}</TableCell>
                 <TableCell className="text-right">
-                  {formatCompactNumber(p.price)}
+                  {formatNumber(p.price)}
                 </TableCell>
                 <TableCell className="text-right">{p.lots}</TableCell>
                 <TableCell className="text-right">
-                  {last !== undefined ? formatCompactNumber(last) : '—'}
+                  {last !== undefined ? formatNumber(last) : '—'}
                 </TableCell>
                 <TableCell
                   className={cn(
                     'text-right',
                     pct === null && 'text-muted-foreground',
-                    pct !== null && pct > 0 && 'text-green-600 dark:text-green-400',
+                    pct !== null &&
+                      pct > 0 &&
+                      'text-green-600 dark:text-green-400',
                     pct !== null && pct < 0 && 'text-red-600 dark:text-red-400'
                   )}
                 >
                   {pct === null ? '—' : formatPercentage(pct)}
                 </TableCell>
                 <TableCell className="text-right">
-                  {formatCompactNumber(invested)}
+                  {formatNumber(invested)}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">

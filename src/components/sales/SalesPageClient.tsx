@@ -24,6 +24,7 @@ import { useSales } from '@/stores/useSales'
 import { qty } from '@/lib/portfolio'
 import { SaleFormDialog, type SaleFormValues } from './SaleFormDialog'
 import { SalesTable } from './SalesTable'
+import { SoftWarnDialog } from '@/components/common/SoftWarnDialog'
 import type { Sale } from '@/types'
 
 type SortKey = 'date-desc' | 'code-asc'
@@ -39,6 +40,10 @@ export function SalesPageClient() {
   const [editing, setEditing] = useState<Sale | undefined>(undefined)
   const [filterCodes, setFilterCodes] = useState<string[]>([])
   const [sortKey, setSortKey] = useState<SortKey>('date-desc')
+  const [pendingSale, setPendingSale] = useState<{
+    values: SaleFormValues
+    heldLots: number
+  } | null>(null)
 
   const uniqueCodes = useMemo(
     () => Array.from(new Set(sales.map((s) => s.code))).sort(),
@@ -67,20 +72,23 @@ export function SalesPageClient() {
     setDialogOpen(true)
   }
 
+  const persistAdd = (values: SaleFormValues) => {
+    addSale(values)
+    toast.success(`${values.code} sale recorded`)
+  }
+
   const handleSubmit = (values: SaleFormValues) => {
     if (editing) {
       updateSale(editing.id, values)
       toast.success(`${values.code} updated`)
-    } else {
-      const heldLots = qty(purchases, sales, values.code) / 100
-      if (values.lots > heldLots) {
-        toast.warning(
-          `Selling ${values.lots} lots but only ${heldLots} held for ${values.code}`
-        )
-      }
-      addSale(values)
-      toast.success(`${values.code} sale recorded`)
+      return
     }
+    const heldLots = qty(purchases, sales, values.code) / 100
+    if (values.lots > heldLots) {
+      setPendingSale({ values, heldLots })
+      return
+    }
+    persistAdd(values)
   }
 
   const handleDelete = (sale: Sale) => {
@@ -190,6 +198,23 @@ export function SalesPageClient() {
         initial={editing}
         purchases={purchases}
         onSubmit={handleSubmit}
+      />
+
+      <SoftWarnDialog
+        open={pendingSale !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingSale(null)
+        }}
+        title="Selling more than you hold"
+        description={
+          pendingSale
+            ? `You're selling ${pendingSale.values.lots} lots of ${pendingSale.values.code} but only ${pendingSale.heldLots} lots held. Continue anyway?`
+            : ''
+        }
+        confirmLabel="Continue"
+        onConfirm={() => {
+          if (pendingSale) persistAdd(pendingSale.values)
+        }}
       />
     </div>
   )

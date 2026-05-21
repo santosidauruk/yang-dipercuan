@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { formatCompactNumber, formatPercentage, cn } from '@/lib/utils'
+import { formatPercentage, cn, formatNumber } from '@/lib/utils'
 import { formatDateDisplay } from '@/lib/date'
 import type { Sale } from '@/types'
 
@@ -64,23 +64,25 @@ export function SalesTable({ sales, onEdit, onDelete }: SalesTableProps) {
                 <TableCell>{formatDateDisplay(s.date)}</TableCell>
                 <TableCell className="font-medium">{s.code}</TableCell>
                 <TableCell className="text-right">
-                  {formatCompactNumber(s.costBasis)}
+                  {formatNumber(s.costBasis)}
                 </TableCell>
                 <TableCell className="text-right">{s.lots}</TableCell>
                 <TableCell className="text-right">
-                  {formatCompactNumber(purchaseValue)}
+                  {formatNumber(purchaseValue)}
                 </TableCell>
                 <TableCell className="text-right">
-                  {formatCompactNumber(s.price)}
+                  {formatNumber(s.price)}
                 </TableCell>
                 <TableCell className="text-right">
-                  {formatCompactNumber(sellValue)}
+                  {formatNumber(sellValue)}
                 </TableCell>
                 <TableCell
                   className={cn(
                     'text-right',
                     pct === null && 'text-muted-foreground',
-                    pct !== null && pct > 0 && 'text-green-600 dark:text-green-400',
+                    pct !== null &&
+                      pct > 0 &&
+                      'text-green-600 dark:text-green-400',
                     pct !== null && pct < 0 && 'text-red-600 dark:text-red-400'
                   )}
                 >
@@ -93,7 +95,7 @@ export function SalesTable({ sales, onEdit, onDelete }: SalesTableProps) {
                     capitalGain < 0 && 'text-red-600 dark:text-red-400'
                   )}
                 >
-                  {formatCompactNumber(capitalGain)}
+                  {formatNumber(capitalGain)}
                 </TableCell>
                 <TableCell className="text-right">
                   <div className="flex justify-end gap-1">

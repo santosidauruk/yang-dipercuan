@@ -8,7 +8,8 @@ import {
   dividendTotal,
   holdings,
   summary,
-  allocations
+  allocations,
+  wouldCauseNegativeQty
 } from './portfolio'
 import type { Purchase, Sale, Dividend } from '@/types'
 
@@ -336,5 +337,55 @@ describe('allocations', () => {
     const prices = { XYZA: 1500 }
     const result = allocations(hs, prices, {}, 'sector')
     expect(result).toEqual([{ label: 'Unknown', value: 750_000, pct: 100 }])
+  })
+})
+
+describe('wouldCauseNegativeQty', () => {
+  it('returns false when no sales exist for the affected code', () => {
+    const purchases = [buy('BBCA', '2026-01-01', 10, 9000)]
+    expect(
+      wouldCauseNegativeQty(purchases, [], purchases[0].id, { lots: 1 })
+    ).toBe(false)
+  })
+
+  it('returns true when reducing lots makes a later sale exceed holdings', () => {
+    const purchases = [buy('BBCA', '2026-01-01', 10, 9000)]
+    const sales = [sell('BBCA', '2026-02-01', 7, 9500, 9000)]
+    expect(
+      wouldCauseNegativeQty(purchases, sales, purchases[0].id, { lots: 5 })
+    ).toBe(true)
+  })
+
+  it('returns true when moving purchase date past an existing sale', () => {
+    const purchases = [buy('BBCA', '2026-01-01', 10, 9000)]
+    const sales = [sell('BBCA', '2026-02-01', 7, 9500, 9000)]
+    expect(
+      wouldCauseNegativeQty(purchases, sales, purchases[0].id, {
+        date: '2026-03-01'
+      })
+    ).toBe(true)
+  })
+
+  it('returns false when patch only changes price', () => {
+    const purchases = [buy('BBCA', '2026-01-01', 10, 9000)]
+    const sales = [sell('BBCA', '2026-02-01', 7, 9500, 9000)]
+    expect(
+      wouldCauseNegativeQty(purchases, sales, purchases[0].id, { price: 8500 })
+    ).toBe(false)
+  })
+
+  it('returns true when code changes away and leaves old-code sales orphaned', () => {
+    const purchases = [buy('BBCA', '2026-01-01', 10, 9000)]
+    const sales = [sell('BBCA', '2026-02-01', 7, 9500, 9000)]
+    expect(
+      wouldCauseNegativeQty(purchases, sales, purchases[0].id, { code: 'PGAS' })
+    ).toBe(true)
+  })
+
+  it('returns false for unknown id', () => {
+    const purchases = [buy('BBCA', '2026-01-01', 10, 9000)]
+    expect(wouldCauseNegativeQty(purchases, [], 'unknown', { lots: 1 })).toBe(
+      false
+    )
   })
 })
