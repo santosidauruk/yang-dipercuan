@@ -41,13 +41,14 @@ export function PurchasesPageClient() {
   const sales = useSales((s) => s.sales)
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editing, setEditing] = useState<Purchase | undefined>(undefined)
+  const [editingData, setEditingData] = useState<Purchase | undefined>(undefined)
   const [filterCodes, setFilterCodes] = useState<string[]>([])
   const [sortKey, setSortKey] = useState<SortKey>('date-desc')
-  const [pendingEdit, setPendingEdit] = useState<{
+  const [pendingEditPurchase, setPendingEditPurchase] = useState<{
     id: string
     values: PurchaseFormValues
   } | null>(null)
+  const [draft, setDraft] = useState<PurchaseFormValues | null>(null)
 
   const uniqueCodes = useMemo(
     () => Array.from(new Set(purchases.map((p) => p.code))).sort(),
@@ -76,12 +77,18 @@ export function PurchasesPageClient() {
   }, [purchases, filterCodes, sortKey])
 
   const openAdd = () => {
-    setEditing(undefined)
+    setEditingData(undefined)
+    setDraft(null)
     setDialogOpen(true)
   }
   const openEdit = (purchase: Purchase) => {
-    setEditing(purchase)
+    setEditingData(purchase)
+    setDraft(null)
     setDialogOpen(true)
+  }
+  const handleFormOpenChange = (open: boolean) => {
+    setDialogOpen(open)
+    if (!open) setDraft(null)
   }
   const persistUpdate = (id: string, values: PurchaseFormValues) => {
     updatePurchase(id, values)
@@ -89,12 +96,12 @@ export function PurchasesPageClient() {
   }
 
   const handleSubmit = (values: PurchaseFormValues) => {
-    if (editing) {
-      if (wouldCauseNegativeQty(purchases, sales, editing.id, values)) {
-        setPendingEdit({ id: editing.id, values })
+    if (editingData) {
+      if (wouldCauseNegativeQty(purchases, sales, editingData.id, values)) {
+        setPendingEditPurchase({ id: editingData.id, values })
         return
       }
-      persistUpdate(editing.id, values)
+      persistUpdate(editingData.id, values)
     } else {
       addPurchase(values)
       toast.success(`${values.code} added`)
@@ -195,25 +202,32 @@ export function PurchasesPageClient() {
 
       <PurchaseFormDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
-        initial={editing}
+        onOpenChange={handleFormOpenChange}
+        initial={editingData}
+        draft={draft}
         onSubmit={handleSubmit}
       />
 
       <SoftWarnDialog
-        open={pendingEdit !== null}
+        open={pendingEditPurchase !== null}
         onOpenChange={(open) => {
-          if (!open) setPendingEdit(null)
+          if (!open) setPendingEditPurchase(null)
         }}
         title="Edit causes negative downstream quantity"
         description={
-          pendingEdit
-            ? `This edit would orphan a later sale of ${pendingEdit.values.code}. Continue anyway?`
+          pendingEditPurchase
+            ? `This edit would orphan a later sale of ${pendingEditPurchase.values.code}. Continue anyway?`
             : ''
         }
         confirmLabel="Continue"
         onConfirm={() => {
-          if (pendingEdit) persistUpdate(pendingEdit.id, pendingEdit.values)
+          if (pendingEditPurchase) persistUpdate(pendingEditPurchase.id, pendingEditPurchase.values)
+        }}
+        onCancel={() => {
+          if (pendingEditPurchase) {
+            setDraft(pendingEditPurchase.values)
+            setDialogOpen(true)
+          }
         }}
       />
     </div>

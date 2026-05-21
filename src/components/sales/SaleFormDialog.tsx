@@ -45,6 +45,7 @@ interface SaleFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   initial?: Sale
+  draft?: SaleFormValues | null
   purchases: Purchase[]
   onSubmit: (values: SaleFormValues) => void
 }
@@ -53,12 +54,13 @@ export function SaleFormDialog({
   open,
   onOpenChange,
   initial,
+  draft,
   purchases,
   onSubmit
 }: SaleFormDialogProps) {
   const form = useForm<SaleFormValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
+    defaultValues: draft ?? {
       date: initial?.date ?? todayISO(),
       code: initial?.code ?? '',
       price: initial?.price ?? 0,
@@ -69,15 +71,17 @@ export function SaleFormDialog({
 
   useEffect(() => {
     if (open) {
-      form.reset({
-        date: initial?.date ?? todayISO(),
-        code: initial?.code ?? '',
-        price: initial?.price ?? 0,
-        lots: initial?.lots ?? 0,
-        costBasis: initial?.costBasis ?? 0
-      })
+      form.reset(
+        draft ?? {
+          date: initial?.date ?? todayISO(),
+          code: initial?.code ?? '',
+          price: initial?.price ?? 0,
+          lots: initial?.lots ?? 0,
+          costBasis: initial?.costBasis ?? 0
+        }
+      )
     }
-  }, [open, initial, form])
+  }, [open, initial, draft, form])
 
   const watchCode = form.watch('code')
   const watchDate = form.watch('date')

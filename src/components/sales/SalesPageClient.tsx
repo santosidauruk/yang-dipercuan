@@ -44,6 +44,7 @@ export function SalesPageClient() {
     values: SaleFormValues
     heldLots: number
   } | null>(null)
+  const [draft, setDraft] = useState<SaleFormValues | null>(null)
 
   const uniqueCodes = useMemo(
     () => Array.from(new Set(sales.map((s) => s.code))).sort(),
@@ -65,11 +66,17 @@ export function SalesPageClient() {
 
   const openAdd = () => {
     setEditing(undefined)
+    setDraft(null)
     setDialogOpen(true)
   }
   const openEdit = (sale: Sale) => {
     setEditing(sale)
+    setDraft(null)
     setDialogOpen(true)
+  }
+  const handleFormOpenChange = (open: boolean) => {
+    setDialogOpen(open)
+    // if (!open) setDraft(null)
   }
 
   const persistAdd = (values: SaleFormValues) => {
@@ -194,8 +201,9 @@ export function SalesPageClient() {
 
       <SaleFormDialog
         open={dialogOpen}
-        onOpenChange={setDialogOpen}
+        onOpenChange={handleFormOpenChange}
         initial={editing}
+        draft={draft}
         purchases={purchases}
         onSubmit={handleSubmit}
       />
@@ -214,6 +222,12 @@ export function SalesPageClient() {
         confirmLabel="Continue"
         onConfirm={() => {
           if (pendingSale) persistAdd(pendingSale.values)
+        }}
+        onCancel={() => {
+          if (pendingSale) {
+            setDraft(pendingSale.values)
+            setDialogOpen(true)
+          }
         }}
       />
     </div>

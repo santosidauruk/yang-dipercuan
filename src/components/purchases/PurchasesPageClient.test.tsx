@@ -97,4 +97,40 @@ describe('PurchasesPageClient soft-warn on edit causing negative downstream qty'
     )
     expect(usePurchases.getState().purchases[0].lots).toBe(10)
   })
+
+  it('reopens PurchaseFormDialog with edited values when Cancel clicked', async () => {
+    const user = await openEditAndReduceLots()
+
+    await screen.findByRole('heading', { name: /negative downstream/i })
+    await user.click(screen.getByRole('button', { name: /cancel/i }))
+
+    expect(
+      await screen.findByRole('heading', { name: /edit purchase/i })
+    ).toBeInTheDocument()
+
+    const inputs = screen.getAllByRole('spinbutton')
+    // price, lots
+    expect((inputs[1] as HTMLInputElement).value).toBe('5')
+    expect((inputs[0] as HTMLInputElement).value).toBe('9000')
+    expect(
+      (screen.getByPlaceholderText('BBCA') as HTMLInputElement).value
+    ).toBe('BBCA')
+  })
+
+  it('does NOT reopen edit form when SoftWarn dismissed via Escape', async () => {
+    const user = await openEditAndReduceLots()
+
+    await screen.findByRole('heading', { name: /negative downstream/i })
+    await user.keyboard('{Escape}')
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('heading', { name: /negative downstream/i })
+      ).not.toBeInTheDocument()
+    )
+    expect(
+      screen.queryByRole('heading', { name: /edit purchase/i })
+    ).not.toBeInTheDocument()
+    expect(usePurchases.getState().purchases[0].lots).toBe(10)
+  })
 })

@@ -45,6 +45,7 @@ interface PurchaseFormDialogProps {
   open: boolean
   onOpenChange: (open: boolean) => void
   initial?: Purchase
+  draft?: PurchaseFormValues | null
   onSubmit: (values: PurchaseFormValues) => void
 }
 
@@ -52,11 +53,12 @@ export function PurchaseFormDialog({
   open,
   onOpenChange,
   initial,
+  draft,
   onSubmit
 }: PurchaseFormDialogProps) {
   const form = useForm<PurchaseFormValues>({
     resolver: zodResolver(schema),
-    defaultValues: {
+    defaultValues: draft ?? {
       date: initial?.date ?? todayISO(),
       code: initial?.code ?? '',
       price: initial?.price ?? 0,
@@ -66,14 +68,16 @@ export function PurchaseFormDialog({
 
   useEffect(() => {
     if (open) {
-      form.reset({
-        date: initial?.date ?? todayISO(),
-        code: initial?.code ?? '',
-        price: initial?.price ?? 0,
-        lots: initial?.lots ?? 0
-      })
+      form.reset(
+        draft ?? {
+          date: initial?.date ?? todayISO(),
+          code: initial?.code ?? '',
+          price: initial?.price ?? 0,
+          lots: initial?.lots ?? 0
+        }
+      )
     }
-  }, [open, initial, form])
+  }, [open, initial, draft, form])
 
   const handleSubmit = form.handleSubmit((values) => {
     onSubmit(values)

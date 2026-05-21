@@ -43,10 +43,9 @@ async function submitOversoldSale() {
   await user.type(codeInput, 'BBCA')
 
   const inputs = screen.getAllByRole('spinbutton')
-  // price, lots, costBasis
+  // price, lots — costBasis auto-fills from purchase avg (9000)
   await user.type(inputs[0], '9500')
   await user.type(inputs[1], '15')
-  await user.type(inputs[2], '9000')
 
   await user.click(screen.getByRole('button', { name: 'Add' }))
 
@@ -89,6 +88,42 @@ describe('SalesPageClient soft-warn on oversold sale', () => {
         screen.queryByRole('heading', { name: /selling more than you hold/i })
       ).not.toBeInTheDocument()
     )
+    expect(useSales.getState().sales).toHaveLength(0)
+  })
+
+  it('reopens SaleFormDialog with prior values when Cancel clicked', async () => {
+    const user = await submitOversoldSale()
+
+    await screen.findByRole('heading', { name: /selling more than you hold/i })
+    await user.click(screen.getByRole('button', { name: /cancel/i }))
+
+    expect(
+      await screen.findByRole('heading', { name: /add sale/i })
+    ).toBeInTheDocument()
+
+    const inputs = screen.getAllByRole('spinbutton')
+    expect((inputs[0] as HTMLInputElement).value).toBe('9500')
+    expect((inputs[1] as HTMLInputElement).value).toBe('15')
+    expect((inputs[2] as HTMLInputElement).value).toBe('9000')
+    expect(
+      (screen.getByPlaceholderText('BBCA') as HTMLInputElement).value
+    ).toBe('BBCA')
+  })
+
+  it('does NOT reopen form when SoftWarn dismissed via Escape', async () => {
+    const user = await submitOversoldSale()
+
+    await screen.findByRole('heading', { name: /selling more than you hold/i })
+    await user.keyboard('{Escape}')
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('heading', { name: /selling more than you hold/i })
+      ).not.toBeInTheDocument()
+    )
+    expect(
+      screen.queryByRole('heading', { name: /add sale/i })
+    ).not.toBeInTheDocument()
     expect(useSales.getState().sales).toHaveLength(0)
   })
 })
