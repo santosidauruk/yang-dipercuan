@@ -5,6 +5,7 @@ import { QueryClient, QueryClientProvider } from '@tanstack/react-query'
 import { PurchasesPageClient } from './PurchasesPageClient'
 import { usePurchases } from '@/stores/usePurchases'
 import { useSales } from '@/stores/useSales'
+import { useDividends } from '@/stores/useDividends'
 
 function renderWithQuery(ui: React.ReactNode) {
   const client = new QueryClient({
@@ -19,6 +20,7 @@ beforeEach(() => {
   localStorage.clear()
   usePurchases.setState({ purchases: [] })
   useSales.setState({ sales: [] })
+  useDividends.setState({ dividends: [] })
   fetchMock.mockReset()
   fetchMock.mockImplementation(async (url: string) => {
     const isPrices = url.includes('/api/stocks/prices')
@@ -132,5 +134,83 @@ describe('PurchasesPageClient soft-warn on edit causing negative downstream qty'
       screen.queryByRole('heading', { name: /edit purchase/i })
     ).not.toBeInTheDocument()
     expect(usePurchases.getState().purchases[0].lots).toBe(10)
+  })
+})
+
+describe('PurchasesPageClient cascade-delete preview', () => {
+  async function setupAndClickDelete() {
+    const user = userEvent.setup()
+    usePurchases.setState({
+      purchases: [
+        { id: 'p1', code: 'BBCA', date: '2026-01-01', lots: 10, price: 9000 }
+      ]
+    })
+    useSales.setState({
+      sales: [
+        {
+          id: 's1',
+          code: 'BBCA',
+          date: '2026-02-01',
+          lots: 3,
+          price: 9500,
+          costBasis: 9000
+        },
+        {
+          id: 's2',
+          code: 'BBCA',
+          date: '2026-03-01',
+          lots: 2,
+          price: 9700,
+          costBasis: 9000
+        }
+      ]
+    })
+    useDividends.setState({
+      dividends: [{ id: 'd1', code: 'BBCA', date: '2026-04-01', dps: 50 }]
+    })
+
+    renderWithQuery(<PurchasesPageClient />)
+    await user.click(screen.getByRole('button', { name: /^delete$/i }))
+    return user
+  }
+
+  it('opens preview dialog showing dependent counts', async () => {
+    await setupAndClickDelete()
+
+    expect(
+      await screen.findByRole('heading', { name: /delete purchase/i })
+    ).toBeInTheDocument()
+    expect(screen.getByText(/2 sales/i)).toBeInTheDocument()
+    expect(screen.getByText(/1 dividend/i)).toBeInTheDocument()
+    expect(usePurchases.getState().purchases).toHaveLength(1)
+  })
+
+  it('removes only the purchase on confirm, leaves dependents intact', async () => {
+    const user = await setupAndClickDelete()
+
+    await screen.findByRole('heading', { name: /delete purchase/i })
+    await user.click(
+      screen.getByRole('button', { name: /^delete$/i, hidden: false })
+    )
+
+    await waitFor(() =>
+      expect(usePurchases.getState().purchases).toHaveLength(0)
+    )
+    expect(useSales.getState().sales).toHaveLength(2)
+    expect(useDividends.getState().dividends).toHaveLength(1)
+  })
+
+  it('keeps purchase when user cancels', async () => {
+    const user = await setupAndClickDelete()
+
+    await screen.findByRole('heading', { name: /delete purchase/i })
+    await user.click(screen.getByRole('button', { name: /cancel/i }))
+
+    await waitFor(() =>
+      expect(
+        screen.queryByRole('heading', { name: /delete purchase/i })
+      ).not.toBeInTheDocument()
+    )
+    expect(usePurchases.getState().purchases).toHaveLength(1)
   })
 })

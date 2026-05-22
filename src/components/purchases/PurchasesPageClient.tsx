@@ -22,6 +22,7 @@ import {
 import { useStocksPrices } from '@/hooks/useStocks'
 import { usePurchases } from '@/stores/usePurchases'
 import { useSales } from '@/stores/useSales'
+import { useDividends } from '@/stores/useDividends'
 import { wouldCauseNegativeQty } from '@/lib/portfolio'
 import {
   PurchaseFormDialog,
@@ -39,6 +40,7 @@ export function PurchasesPageClient() {
   const updatePurchase = usePurchases((s) => s.updatePurchase)
   const removePurchase = usePurchases((s) => s.removePurchase)
   const sales = useSales((s) => s.sales)
+  const dividends = useDividends((s) => s.dividends)
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [editingData, setEditingData] = useState<Purchase | undefined>(undefined)
@@ -49,6 +51,7 @@ export function PurchasesPageClient() {
     values: PurchaseFormValues
   } | null>(null)
   const [draft, setDraft] = useState<PurchaseFormValues | null>(null)
+  const [pendingDelete, setPendingDelete] = useState<Purchase | null>(null)
 
   const uniqueCodes = useMemo(
     () => Array.from(new Set(purchases.map((p) => p.code))).sort(),
@@ -108,15 +111,19 @@ export function PurchasesPageClient() {
     }
   }
   const handleDelete = (purchase: Purchase) => {
-    if (
-      confirm(
-        `Delete purchase ${purchase.code} on ${purchase.date}? This cannot be undone.`
-      )
-    ) {
-      removePurchase(purchase.id)
-      toast.success(`${purchase.code} deleted`)
-    }
+    setPendingDelete(purchase)
   }
+  const confirmDelete = () => {
+    if (!pendingDelete) return
+    removePurchase(pendingDelete.id)
+    toast.success(`${pendingDelete.code} deleted`)
+  }
+  const pendingDeleteSalesCount = pendingDelete
+    ? sales.filter((s) => s.code === pendingDelete.code).length
+    : 0
+  const pendingDeleteDividendsCount = pendingDelete
+    ? dividends.filter((d) => d.code === pendingDelete.code).length
+    : 0
   const toggleFilter = (code: string) => {
     setFilterCodes((cur) =>
       cur.includes(code) ? cur.filter((c) => c !== code) : [...cur, code]
@@ -229,6 +236,34 @@ export function PurchasesPageClient() {
             setDialogOpen(true)
           }
         }}
+      />
+
+      <SoftWarnDialog
+        open={pendingDelete !== null}
+        onOpenChange={(open) => {
+          if (!open) setPendingDelete(null)
+        }}
+        title="Delete purchase"
+        description={
+          pendingDelete ? (
+            <>
+              <p>
+                Delete purchase {pendingDelete.code} on {pendingDelete.date}?
+                This cannot be undone.
+              </p>
+              <p className="text-muted-foreground mt-2">
+                This will not affect {pendingDeleteSalesCount}{' '}
+                {pendingDeleteSalesCount === 1 ? 'sale' : 'sales'} and{' '}
+                {pendingDeleteDividendsCount}{' '}
+                {pendingDeleteDividendsCount === 1 ? 'dividend' : 'dividends'}{' '}
+                for {pendingDelete.code}.
+              </p>
+            </>
+          ) : null
+        }
+        confirmLabel="Delete"
+        cancelLabel="Cancel"
+        onConfirm={confirmDelete}
       />
     </div>
   )

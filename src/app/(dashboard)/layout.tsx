@@ -1,5 +1,6 @@
 import { Header } from '@/components/layout/Header'
 import { BottomNav } from '@/components/layout/BottomNav'
+import { OnboardingGate } from '@/components/common/OnboardingGate'
 
 export default function DashboardLayout({
   children
@@ -15,6 +16,7 @@ export default function DashboardLayout({
         </main>
         <BottomNav />
       </div>
+      <OnboardingGate />
     </div>
   )
 }
