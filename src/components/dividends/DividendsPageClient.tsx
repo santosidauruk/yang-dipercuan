@@ -20,6 +20,11 @@ import {
   type DividendFormValues
 } from './DividendFormDialog'
 import { DividendsTable } from './DividendsTable'
+import { SoftWarnDialog } from '@/components/common/SoftWarnDialog'
+import { CsvActions } from '@/components/common/CsvActions'
+import { serializeDividends, parseDividends } from '@/lib/csv-dividends'
+import { CsvImportError } from '@/lib/csv-purchases'
+import { todayISO } from '@/lib/date'
 import type { Dividend } from '@/types'
 
 export function DividendsPageClient() {
@@ -31,6 +36,7 @@ export function DividendsPageClient() {
 
   const [dialogOpen, setDialogOpen] = useState(false)
   const [filterCodes, setFilterCodes] = useState<string[]>([])
+  const [importError, setImportError] = useState<string | null>(null)
 
   const uniqueCodes = useMemo(
     () => Array.from(new Set(dividends.map((d) => d.code))).sort(),
@@ -73,6 +79,17 @@ export function DividendsPageClient() {
     }
   }
 
+  const handleImport = (text: string) => {
+    try {
+      const parsed = parseDividends(text)
+      parsed.forEach((d) => addDividend(d))
+      toast.success(`${parsed.length} dividends imported`)
+    } catch (e) {
+      setImportError(
+        e instanceof CsvImportError ? e.message : 'Could not parse CSV'
+      )
+    }
+  }
   const toggleFilter = (code: string) => {
     setFilterCodes((cur) =>
       cur.includes(code) ? cur.filter((c) => c !== code) : [...cur, code]
@@ -100,6 +117,14 @@ export function DividendsPageClient() {
             Add
           </Button>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <CsvActions
+          filename={`dividends-${todayISO()}.csv`}
+          buildCsv={() => serializeDividends(dividends, { purchases, sales })}
+          onImport={handleImport}
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -158,6 +183,18 @@ export function DividendsPageClient() {
         open={dialogOpen}
         onOpenChange={setDialogOpen}
         onSubmit={handleSubmit}
+      />
+
+      <SoftWarnDialog
+        open={importError !== null}
+        onOpenChange={(open) => {
+          if (!open) setImportError(null)
+        }}
+        title="Import failed"
+        description={importError ? <p>{importError}. No rows imported.</p> : null}
+        confirmLabel="OK"
+        cancelLabel="Close"
+        onConfirm={() => setImportError(null)}
       />
     </div>
   )

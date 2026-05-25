@@ -214,3 +214,51 @@ describe('PurchasesPageClient cascade-delete preview', () => {
     expect(usePurchases.getState().purchases).toHaveLength(1)
   })
 })
+
+describe('PurchasesPageClient CSV import', () => {
+  it('appends valid rows to the store', async () => {
+    const user = userEvent.setup()
+    renderWithQuery(<PurchasesPageClient />)
+
+    const file = new File(
+      ['id,date,code,price,lots\np1,2026-01-01,BBCA,9000,5\n'],
+      'purchases.csv',
+      { type: 'text/csv' }
+    )
+    const input = screen.getByTestId('csv-import-input') as HTMLInputElement
+    await user.upload(input, file)
+
+    await waitFor(() =>
+      expect(usePurchases.getState().purchases).toHaveLength(1)
+    )
+    expect(usePurchases.getState().purchases[0]).toMatchObject({
+      id: 'p1',
+      code: 'BBCA',
+      price: 9000,
+      lots: 5
+    })
+  })
+
+  it('shows error dialog and inserts nothing when any row is invalid', async () => {
+    const user = userEvent.setup()
+    renderWithQuery(<PurchasesPageClient />)
+
+    const file = new File(
+      [
+        'id,date,code,price,lots\n' +
+          'p1,2026-01-01,BBCA,9000,5\n' +
+          'p2,bad-date,BBCA,9000,5\n'
+      ],
+      'purchases.csv',
+      { type: 'text/csv' }
+    )
+    const input = screen.getByTestId('csv-import-input') as HTMLInputElement
+    await user.upload(input, file)
+
+    expect(
+      await screen.findByRole('heading', { name: /import failed/i })
+    ).toBeInTheDocument()
+    expect(screen.getByText(/row 3/i)).toBeInTheDocument()
+    expect(usePurchases.getState().purchases).toHaveLength(0)
+  })
+})

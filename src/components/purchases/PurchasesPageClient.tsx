@@ -30,6 +30,13 @@ import {
 } from './PurchaseFormDialog'
 import { PurchasesTable } from './PurchasesTable'
 import { SoftWarnDialog } from '@/components/common/SoftWarnDialog'
+import { CsvActions } from '@/components/common/CsvActions'
+import {
+  serializePurchases,
+  parsePurchases,
+  CsvImportError
+} from '@/lib/csv-purchases'
+import { todayISO } from '@/lib/date'
 import type { Purchase } from '@/types'
 
 type SortKey = 'date-desc' | 'code-asc'
@@ -52,6 +59,7 @@ export function PurchasesPageClient() {
   } | null>(null)
   const [draft, setDraft] = useState<PurchaseFormValues | null>(null)
   const [pendingDelete, setPendingDelete] = useState<Purchase | null>(null)
+  const [importError, setImportError] = useState<string | null>(null)
 
   const uniqueCodes = useMemo(
     () => Array.from(new Set(purchases.map((p) => p.code))).sort(),
@@ -124,6 +132,19 @@ export function PurchasesPageClient() {
   const pendingDeleteDividendsCount = pendingDelete
     ? dividends.filter((d) => d.code === pendingDelete.code).length
     : 0
+  const handleImport = (text: string) => {
+    try {
+      const parsed = parsePurchases(text)
+      parsed.forEach((p) => addPurchase(p))
+      toast.success(`${parsed.length} purchases imported`)
+    } catch (e) {
+      if (e instanceof CsvImportError) {
+        setImportError(e.message)
+      } else {
+        setImportError('Could not parse CSV')
+      }
+    }
+  }
   const toggleFilter = (code: string) => {
     setFilterCodes((cur) =>
       cur.includes(code) ? cur.filter((c) => c !== code) : [...cur, code]
@@ -143,6 +164,14 @@ export function PurchasesPageClient() {
           <Plus className="h-4 w-4" />
           Add
         </Button>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <CsvActions
+          filename={`purchases-${todayISO()}.csv`}
+          buildCsv={() => serializePurchases(purchases, { prices })}
+          onImport={handleImport}
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -264,6 +293,22 @@ export function PurchasesPageClient() {
         confirmLabel="Delete"
         cancelLabel="Cancel"
         onConfirm={confirmDelete}
+      />
+
+      <SoftWarnDialog
+        open={importError !== null}
+        onOpenChange={(open) => {
+          if (!open) setImportError(null)
+        }}
+        title="Import failed"
+        description={
+          importError ? (
+            <p>{importError}. No rows imported.</p>
+          ) : null
+        }
+        confirmLabel="OK"
+        cancelLabel="Close"
+        onConfirm={() => setImportError(null)}
       />
     </div>
   )
