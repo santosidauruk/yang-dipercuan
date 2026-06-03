@@ -6,12 +6,12 @@ export function cn(...inputs: ClassValue[]) {
 }
 
 export function formatCurrency(value: number): string {
-  return new Intl.NumberFormat('id-ID', {
-    style: 'currency',
-    currency: 'IDR',
+  const formatted = new Intl.NumberFormat('id-ID', {
+    style: 'decimal',
     minimumFractionDigits: 0,
     maximumFractionDigits: 0
   }).format(value)
+  return `Rp${formatted}`
 }
 
 export function formatNumber(value: number): string {

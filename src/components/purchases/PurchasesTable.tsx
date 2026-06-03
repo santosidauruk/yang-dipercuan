@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { formatNumber, formatPercentage } from '@/lib/utils'
+import { formatCurrency, formatNumber, formatPercentage } from '@/lib/utils'
 import { formatDateDisplay } from '@/lib/date'
 import { cn } from '@/lib/utils'
 import type { Purchase } from '@/types'
@@ -44,38 +44,52 @@ export function PurchasesTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Date</TableHead>
-            <TableHead>Code</TableHead>
-            <TableHead className="text-right">Price</TableHead>
-            <TableHead className="text-right">Lots</TableHead>
-            <TableHead className="text-right">Last Price</TableHead>
-            <TableHead className="text-right">%Δ</TableHead>
-            <TableHead className="text-right">Invested Value</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="text-center">Tanggal Pembelian</TableHead>
+            <TableHead className="text-center">Kode Saham</TableHead>
+            <TableHead className="text-center">Harga Beli</TableHead>
+            <TableHead className="text-center">Jumlah Lot</TableHead>
+            <TableHead className="text-center">Harga Terakhir</TableHead>
+            <TableHead className="text-center">Nilai Investasi</TableHead>
+            <TableHead className="text-center">Nilai Saat Ini</TableHead>
+            <TableHead className="text-center">Kenaikan/Penurunan</TableHead>
+            <TableHead className="text-center">Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
           {purchases.map((p) => {
             const last = prices[`${p.code}.JK`]
             const invested = p.price * p.lots * SHARES_PER_LOT
+            const currentValue =
+              last !== undefined ? last * p.lots * SHARES_PER_LOT : 0
             const pct =
               last !== undefined && p.price > 0
                 ? ((last - p.price) / p.price) * 100
                 : null
+
             return (
               <TableRow key={p.id}>
-                <TableCell>{formatDateDisplay(p.date)}</TableCell>
-                <TableCell className="font-medium">{p.code}</TableCell>
-                <TableCell className="text-right">
-                  {formatNumber(p.price)}
+                <TableCell className="text-center">
+                  {formatDateDisplay(p.date)}
                 </TableCell>
-                <TableCell className="text-right">{p.lots}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-center font-medium">
+                  {p.code}
+                </TableCell>
+                <TableCell className="text-center">
+                  {formatCurrency(p.price)}
+                </TableCell>
+                <TableCell className="text-center">{p.lots}</TableCell>
+                <TableCell className="text-center">
                   {last !== undefined ? formatNumber(last) : '—'}
+                </TableCell>
+                <TableCell className="text-center">
+                  {formatCurrency(invested)}
+                </TableCell>
+                <TableCell className="text-center">
+                  {formatCurrency(currentValue)}
                 </TableCell>
                 <TableCell
                   className={cn(
-                    'text-right',
+                    'text-center',
                     pct === null && 'text-muted-foreground',
                     pct !== null &&
                       pct > 0 &&
@@ -85,10 +99,8 @@ export function PurchasesTable({
                 >
                   {pct === null ? '—' : formatPercentage(pct)}
                 </TableCell>
-                <TableCell className="text-right">
-                  {formatNumber(invested)}
-                </TableCell>
-                <TableCell className="text-right">
+
+                <TableCell className="text-center">
                   <div className="flex justify-end gap-1">
                     <Button
                       variant="ghost"

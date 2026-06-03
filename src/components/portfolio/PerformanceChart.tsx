@@ -150,7 +150,6 @@ export function PerformanceChart({ purchases, sales }: Props) {
     const out = Array.from(map.values()).sort((a, b) =>
       a.date.localeCompare(b.date)
     )
-    console.log({ chartData: out })
     return out
   }, [portfolioSeries, benchmarkSeries])
 

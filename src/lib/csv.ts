@@ -10,16 +10,20 @@ function escapeField(value: string | number | undefined): string {
 
 export function csvSerialize<T extends CsvRow>(
   rows: T[],
-  columns: string[]
+  columns: Record<keyof T, string>
 ): string {
-  const header = columns.join(',')
+  const header = Object.values(columns).join(',')
+  const headerKeys = Object.keys(columns)
   const lines = rows.map((row) =>
-    columns.map((c) => escapeField(row[c])).join(',')
+    headerKeys.map((k) => escapeField(row[k])).join(',')
   )
   return [header, ...lines].join('\n') + '\n'
 }
 
-function parseLine(text: string, start: number): { fields: string[]; next: number } {
+function parseLine(
+  text: string,
+  start: number
+): { fields: string[]; next: number } {
   const fields: string[] = []
   let i = start
   let field = ''
@@ -79,6 +83,7 @@ export function csvParse(text: string): Record<string, string>[] {
   if (text.length === 0) return []
 
   const headerRes = parseLine(text, 0)
+  console.log({ headerRes })
   const headers = headerRes.fields
   const rows: Record<string, string>[] = []
   let i = headerRes.next

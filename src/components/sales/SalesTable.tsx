@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { formatPercentage, cn, formatNumber } from '@/lib/utils'
+import { formatPercentage, cn, formatNumber, formatCurrency } from '@/lib/utils'
 import { formatDateDisplay } from '@/lib/date'
 import type { Sale } from '@/types'
 
@@ -37,16 +37,16 @@ export function SalesTable({ sales, onEdit, onDelete }: SalesTableProps) {
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Sale Date</TableHead>
-            <TableHead>Code</TableHead>
+            <TableHead className="text-center">Tanggal Penjualan</TableHead>
+            <TableHead className="text-center">Kode Saham</TableHead>
             <TableHead className="text-right">Cost Basis</TableHead>
             <TableHead className="text-right">Lots</TableHead>
             <TableHead className="text-right">Purchase Value</TableHead>
-            <TableHead className="text-right">Sell Price</TableHead>
-            <TableHead className="text-right">Sell Value</TableHead>
-            <TableHead className="text-right">%Δ</TableHead>
-            <TableHead className="text-right">Capital Gain</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="text-center">Harga Penjualan</TableHead>
+            <TableHead className="text-center">Nilai Penjualan</TableHead>
+            <TableHead className="text-center">Kenaikan/Penurunan</TableHead>
+            <TableHead className="text-center">Keuntungan/Kerugian</TableHead>
+            <TableHead className="text-center">Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -61,24 +61,24 @@ export function SalesTable({ sales, onEdit, onDelete }: SalesTableProps) {
                 : null
             return (
               <TableRow key={s.id}>
-                <TableCell>{formatDateDisplay(s.date)}</TableCell>
-                <TableCell className="font-medium">{s.code}</TableCell>
-                <TableCell className="text-right">
-                  {formatNumber(s.costBasis)}
+                <TableCell className="text-center">{formatDateDisplay(s.date)}</TableCell>
+                <TableCell className="text-center font-medium">{s.code}</TableCell>
+                <TableCell className="text-center">
+                  {formatCurrency(s.costBasis)}
                 </TableCell>
-                <TableCell className="text-right">{s.lots}</TableCell>
-                <TableCell className="text-right">
-                  {formatNumber(purchaseValue)}
+                <TableCell className="text-center">{s.lots}</TableCell>
+                <TableCell className="text-center">
+                  {formatCurrency(purchaseValue)}
                 </TableCell>
-                <TableCell className="text-right">
-                  {formatNumber(s.price)}
+                <TableCell className="text-center">
+                  {formatCurrency(s.price)}
                 </TableCell>
-                <TableCell className="text-right">
-                  {formatNumber(sellValue)}
+                <TableCell className="text-center">
+                  {formatCurrency(sellValue)}
                 </TableCell>
                 <TableCell
                   className={cn(
-                    'text-right',
+                    'text-center',
                     pct === null && 'text-muted-foreground',
                     pct !== null &&
                       pct > 0 &&
@@ -90,14 +90,14 @@ export function SalesTable({ sales, onEdit, onDelete }: SalesTableProps) {
                 </TableCell>
                 <TableCell
                   className={cn(
-                    'text-right',
+                    'text-center',
                     capitalGain > 0 && 'text-green-600 dark:text-green-400',
                     capitalGain < 0 && 'text-red-600 dark:text-red-400'
                   )}
                 >
-                  {formatNumber(capitalGain)}
+                  {formatCurrency(capitalGain)}
                 </TableCell>
-                <TableCell className="text-right">
+                  <TableCell className="text-center">
                   <div className="flex justify-end gap-1">
                     <Button
                       variant="ghost"

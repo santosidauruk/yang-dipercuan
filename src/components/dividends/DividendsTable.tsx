@@ -10,7 +10,7 @@ import {
   TableHeader,
   TableRow
 } from '@/components/ui/table'
-import { formatCompactNumber, formatPercentage } from '@/lib/utils'
+import { formatCompactNumber, formatCurrency, formatPercentage } from '@/lib/utils'
 import { formatDateDisplay } from '@/lib/date'
 import { dividendRow } from '@/lib/portfolio'
 import type { Dividend, Purchase, Sale } from '@/types'
@@ -42,15 +42,15 @@ export function DividendsTable({
       <Table>
         <TableHeader>
           <TableRow>
-            <TableHead>Receipt Date</TableHead>
-            <TableHead>Code</TableHead>
-            <TableHead className="text-right">Avg Cost</TableHead>
-            <TableHead className="text-right">Lots Held</TableHead>
-            <TableHead className="text-right">Purchase Value</TableHead>
-            <TableHead className="text-right">DPS</TableHead>
-            <TableHead className="text-right">Yield %</TableHead>
-            <TableHead className="text-right">Total Dividend</TableHead>
-            <TableHead className="text-right">Actions</TableHead>
+            <TableHead className="text-center">Tanggal Penerimaan</TableHead>
+            <TableHead className="text-center">Kode Saham</TableHead>
+            <TableHead className="text-center">Harga Beli Rata-Rata</TableHead>
+            <TableHead className="text-center">Jumlah Lot</TableHead>
+            <TableHead className="text-center">Nilai Investasi</TableHead>
+            <TableHead className="text-center">DPS</TableHead>
+            <TableHead className="text-center">Yield %</TableHead>
+            <TableHead className="text-center">Total Dividend</TableHead>
+            <TableHead className="text-center">Aksi</TableHead>
           </TableRow>
         </TableHeader>
         <TableBody>
@@ -63,25 +63,25 @@ export function DividendsTable({
               <TableRow key={d.id}>
                 <TableCell>{formatDateDisplay(d.date)}</TableCell>
                 <TableCell className="font-medium">{d.code}</TableCell>
-                <TableCell className="text-right">
-                  {avgCostVal > 0 ? formatCompactNumber(avgCostVal) : '—'}
+                <TableCell className="text-center">
+                  {avgCostVal > 0 ? formatCurrency(avgCostVal) : '—'}
                 </TableCell>
-                <TableCell className="text-right">{row.qtyHeld}</TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-center">{row.qtyHeld}</TableCell>
+                <TableCell className="text-center">
                   {row.purchaseValue > 0
-                    ? formatCompactNumber(row.purchaseValue)
+                    ? formatCurrency(row.purchaseValue)
                     : '—'}
                 </TableCell>
-                <TableCell className="text-right">
-                  {formatCompactNumber(d.dps)}
+                <TableCell className="text-center">
+                  {formatCurrency(d.dps)}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-center">
                   {row.yieldPct > 0 ? formatPercentage(row.yieldPct) : '—'}
                 </TableCell>
-                <TableCell className="text-right">
-                  {formatCompactNumber(row.totalDividend)}
+                <TableCell className="text-center">
+                  {formatCurrency(row.totalDividend)}
                 </TableCell>
-                <TableCell className="text-right">
+                <TableCell className="text-center">
                   <Button
                     variant="ghost"
                     size="sm"

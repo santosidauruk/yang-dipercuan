@@ -1,7 +1,8 @@
 import { format, parseISO } from 'date-fns'
+import { id } from 'date-fns/locale/id'
 
 export function formatDateDisplay(iso: string): string {
-  return format(parseISO(iso), 'dd/MM/yyyy')
+  return format(parseISO(iso), 'd MMMM yyyy', { locale: id })
 }
 
 export function todayISO(): string {

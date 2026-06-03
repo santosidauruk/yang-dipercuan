@@ -129,6 +129,8 @@ export function summary(
   const unrealizedPL = totalCurrentValue - totalInvested
   const realizedGain = realizedPL(sales)
   const totalDividends = dividendTotal(purchases, sales, dividends)
+  console.log({ hs, totalInvested, totalCurrentValue, unrealizedPL, realizedGain, totalDividends })
+  console.log({sales})
   return {
     totalInvested,
     totalCurrentValue,

@@ -5,13 +5,20 @@ const SHARES_PER_LOT = 100
 const CODE_RE = /^[A-Z]{3,5}$/
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
-const CANONICAL = ['id', 'date', 'code', 'price', 'lots'] as const
-const EXPORT_COLUMNS = [
+export const CANONICAL = {
+  id: 'ID',
+  date: 'Tanggal Pembelian',
+  code: 'Kode Saham',
+  price: 'Harga Beli',
+  lots: 'Jumlah Lot'
+} as const
+
+export const EXPORT_COLUMNS = {
   ...CANONICAL,
-  'lastPrice',
-  'percentChange',
-  'investedValue'
-] as const
+  lastPrice: 'Harga Terakhir',
+  percentChange: 'Kenaikan/Penurunan',
+  investedValue: 'Nilai Investasi'
+} as const
 
 export class CsvImportError extends Error {
   row: number
@@ -50,7 +57,7 @@ export function serializePurchases(
       investedValue: invested
     }
   })
-  return csvSerialize(rows, EXPORT_COLUMNS as unknown as string[])
+  return csvSerialize(rows, EXPORT_COLUMNS)
 }
 
 function parsePositiveNumber(
@@ -58,6 +65,7 @@ function parsePositiveNumber(
   row: number,
   field: string
 ): number {
+  console.log({ value })
   const n = Number(value)
   if (!Number.isFinite(n) || n <= 0) {
     throw new CsvImportError(row, `${field} must be a positive number`)
@@ -92,7 +100,9 @@ export function parsePurchases(text: string): Purchase[] {
     }
 
     const price = parsePositiveNumber(r.price ?? '', rowNum, 'price')
+    console.log({ price })
     const lots = parsePositiveInt(r.lots ?? '', rowNum, 'lots')
+    console.log({ lots })
 
     let id = (r.id ?? '').trim()
     if (!id || seenIds.has(id)) {
