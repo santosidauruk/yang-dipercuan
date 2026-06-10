@@ -13,12 +13,12 @@ Add per-transaction fee fields. User-entered, no auto-calculation.
 ```ts
 interface Purchase {
   // ...existing fields
-  fee?: number    // IDR, optional
+  fee?: number // IDR, optional
 }
 
 interface Sale {
   // ...existing fields
-  fee?: number    // IDR, optional
+  fee?: number // IDR, optional
 }
 ```
 
@@ -55,7 +55,7 @@ When fees ship (§1 above), make tax automatic:
 saleNetProceeds = sale.price × sale.lots × 100 × (1 − 0.001) − sale.fee
 ```
 
-Configurable rate in `yangdipercuan:settings` for forward-compatibility (regulator may change rate).
+Configurable rate in `granary:settings` for forward-compatibility (regulator may change rate).
 
 ### UI
 
@@ -82,7 +82,7 @@ UI: column in `/purchases` table. Highlight row if `lastPrice <= trailingStop`. 
 
 Track high-water mark per holding via daily Yahoo close samples; stop ratchets up but never down. Requires:
 
-- New store: `yangdipercuan:trailingHighWaterMarks` keyed by code.
+- New store: `granary:trailingHighWaterMarks` keyed by code.
 - Background poller updating high-water marks against latest close.
 - User enters trailing % rather than absolute price.
 
@@ -100,16 +100,16 @@ Chat interface to ask questions about the user's portfolio and watchlist using t
 
 - **Client-side direct calls only.** No server proxy. API keys never leave the user's browser.
 - **Provider picker** with lazy-loaded SDKs per choice:
-  | Provider   | Package                          |
+  | Provider | Package |
   | ---------- | -------------------------------- |
-  | OpenAI     | `@ai-sdk/openai`                 |
-  | Anthropic  | `@ai-sdk/anthropic`              |
-  | Google     | `@ai-sdk/google`                 |
-  | OpenCode   | `ai-sdk-provider-opencode-sdk`   |
+  | OpenAI | `@ai-sdk/openai` |
+  | Anthropic | `@ai-sdk/anthropic` |
+  | Google | `@ai-sdk/google` |
+  | OpenCode | `ai-sdk-provider-opencode-sdk` |
 
   Add Sumopod (and other OpenAI-compatible endpoints) later via `@ai-sdk/openai-compatible` with custom `baseURL`.
 
-- **API key storage:** `yangdipercuan:settings.aiKeys[provider]` in localStorage. Show clear warning that keys are stored in plain text in the browser.
+- **API key storage:** `granary:settings.aiKeys[provider]` in localStorage. Show clear warning that keys are stored in plain text in the browser.
 - **Chat history persistence:** ephemeral. Cleared on tab/session close. Show one-time info notice on `/chat` first load: "Conversations are not saved. Reloading clears history."
 
 ### Context strategy — hybrid
@@ -129,14 +129,14 @@ Dividends YTD: {total} IDR across {N} stocks.
 
 #### Tools exposed to model
 
-| Tool                       | Returns                                                           |
-| -------------------------- | ----------------------------------------------------------------- |
-| `getHoldings()`            | Full holdings array with derived fields.                          |
-| `getWatchlist()`           | Watchlist with current prices.                                    |
-| `getPurchases({ code? })`  | Purchase rows, optionally filtered by code.                       |
-| `getSales({ code? })`      | Sale rows, optionally filtered.                                   |
-| `getDividends({ code? })`  | Dividend rows, optionally filtered.                               |
-| `getStockHistory({ code, range })` | Yahoo daily closes for context on price moves.            |
+| Tool                               | Returns                                        |
+| ---------------------------------- | ---------------------------------------------- |
+| `getHoldings()`                    | Full holdings array with derived fields.       |
+| `getWatchlist()`                   | Watchlist with current prices.                 |
+| `getPurchases({ code? })`          | Purchase rows, optionally filtered by code.    |
+| `getSales({ code? })`              | Sale rows, optionally filtered.                |
+| `getDividends({ code? })`          | Dividend rows, optionally filtered.            |
+| `getStockHistory({ code, range })` | Yahoo daily closes for context on price moves. |
 
 All tools resolve client-side from Zustand stores or `/api/stocks/*` route handlers.
 

@@ -1,4 +1,4 @@
-# Yang Dipercuan — PRD & Architecture
+# Granary — PRD & Architecture
 
 > Personal IDX stock portfolio tracker. Browser-only data, Yahoo Finance for market quotes. Successor to the StockIDX scaffolding in this repo (legacy auth/onboard/settings/recommendations/dashboard removed).
 
@@ -19,21 +19,21 @@
 
 ## 3. Tech stack
 
-| Layer            | Choice                                                                          | Notes                                                          |
-| ---------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------- |
-| Framework        | Next.js 16 (App Router, React 19)                                               | Already configured. SSR not used; route handlers proxy Yahoo.  |
-| Styling          | Tailwind v4 + shadcn/ui (`new-york`, `neutral`)                                 | Existing config kept.                                          |
-| Server state     | TanStack Query (30s `refetchInterval` for prices)                               | Existing `Providers` setup kept.                               |
-| Client state     | Zustand + `persist` middleware → localStorage                                   | Replaces MSW-backed mocks.                                     |
-| Forms            | `react-hook-form` + `zod`                                                       | Kept.                                                          |
-| Charts           | `recharts` (existing in `src/components/charts/`)                               | Donut for allocation, line for TWR vs IHSG.                    |
-| Market data      | `yahoo-finance2` server-only via `/api/stocks/*` route handlers                 | Existing handlers kept.                                        |
-| CSV              | `papaparse` (parse + unparse)                                                   | New dep.                                                       |
-| Date utilities   | `date-fns`                                                                      | New dep, used for TWR window math + Asia/Jakarta date parsing. |
-| Theming          | `next-themes` (system default, fallback `dark`)                                 | Existing.                                                      |
-| Toasts           | `sonner`                                                                        | Existing.                                                      |
-| AI (deferred)    | `@ai-sdk/openai`, `@ai-sdk/anthropic`, `@ai-sdk/google`, OpenCode community SDK | Lazy-loaded.                                                   |
-| Deployment       | Self-host on Sumopod (VPS)                                                      | See [deploy-sumopod.md](deploy-sumopod.md).                    |
+| Layer          | Choice                                                                          | Notes                                                          |
+| -------------- | ------------------------------------------------------------------------------- | -------------------------------------------------------------- |
+| Framework      | Next.js 16 (App Router, React 19)                                               | Already configured. SSR not used; route handlers proxy Yahoo.  |
+| Styling        | Tailwind v4 + shadcn/ui (`new-york`, `neutral`)                                 | Existing config kept.                                          |
+| Server state   | TanStack Query (30s `refetchInterval` for prices)                               | Existing `Providers` setup kept.                               |
+| Client state   | Zustand + `persist` middleware → localStorage                                   | Replaces MSW-backed mocks.                                     |
+| Forms          | `react-hook-form` + `zod`                                                       | Kept.                                                          |
+| Charts         | `recharts` (existing in `src/components/charts/`)                               | Donut for allocation, line for TWR vs IHSG.                    |
+| Market data    | `yahoo-finance2` server-only via `/api/stocks/*` route handlers                 | Existing handlers kept.                                        |
+| CSV            | `papaparse` (parse + unparse)                                                   | New dep.                                                       |
+| Date utilities | `date-fns`                                                                      | New dep, used for TWR window math + Asia/Jakarta date parsing. |
+| Theming        | `next-themes` (system default, fallback `dark`)                                 | Existing.                                                      |
+| Toasts         | `sonner`                                                                        | Existing.                                                      |
+| AI (deferred)  | `@ai-sdk/openai`, `@ai-sdk/anthropic`, `@ai-sdk/google`, OpenCode community SDK | Lazy-loaded.                                                   |
+| Deployment     | Self-host on Sumopod (VPS)                                                      | See [deploy-sumopod.md](deploy-sumopod.md).                    |
 
 ### Drops
 
@@ -46,14 +46,14 @@
 
 5 nav entries (BottomNav on mobile, header on wider widths). All icons + labels.
 
-| Route         | Purpose                                                              |
-| ------------- | -------------------------------------------------------------------- |
-| `/`           | Redirect to `/portfolio`.                                            |
-| `/portfolio`  | Default landing. Summary + allocation chart + TWR-vs-IHSG + holdings table. |
-| `/purchases`  | Purchase history. Filter by issuer, sort by date desc default.       |
-| `/sales`      | Sales history. Filter by issuer, sort by sale date desc default.     |
-| `/dividends`  | Dividend history. Filter by issuer, sort by receipt date desc default. |
-| `/watchlist`  | Search-driven watchlist. Yahoo search filtered to `.JK` results.     |
+| Route            | Purpose                                                                                                                 |
+| ---------------- | ----------------------------------------------------------------------------------------------------------------------- |
+| `/`              | Redirect to `/portfolio`.                                                                                               |
+| `/portfolio`     | Default landing. Summary + allocation chart + TWR-vs-IHSG + holdings table.                                             |
+| `/purchases`     | Purchase history. Filter by issuer, sort by date desc default.                                                          |
+| `/sales`         | Sales history. Filter by issuer, sort by sale date desc default.                                                        |
+| `/dividends`     | Dividend history. Filter by issuer, sort by receipt date desc default.                                                  |
+| `/watchlist`     | Search-driven watchlist. Yahoo search filtered to `.JK` results.                                                        |
 | `/stocks/[code]` | Stock detail (chart, timeframe, watchlist add). Deep-link only — not in nav. Reached from holdings/watchlist row click. |
 
 ## 5. Data model
@@ -67,31 +67,31 @@ type UUID = string // crypto.randomUUID()
 
 interface Purchase {
   id: UUID
-  date: string         // ISO YYYY-MM-DD
-  code: string         // e.g. "BBCA"
-  price: number        // IDR per share
-  lots: number         // 1 lot = 100 shares
+  date: string // ISO YYYY-MM-DD
+  code: string // e.g. "BBCA"
+  price: number // IDR per share
+  lots: number // 1 lot = 100 shares
 }
 
 interface Sale {
   id: UUID
-  date: string         // ISO sale date
+  date: string // ISO sale date
   code: string
-  price: number        // sell price IDR per share
+  price: number // sell price IDR per share
   lots: number
-  costBasis: number    // wavg-at-sale, auto-filled, user-editable
+  costBasis: number // wavg-at-sale, auto-filled, user-editable
 }
 
 interface Dividend {
   id: UUID
-  date: string         // ISO receipt date
+  date: string // ISO receipt date
   code: string
-  dps: number          // dividend per share, IDR
+  dps: number // dividend per share, IDR
 }
 
 interface WatchlistItem {
-  code: string         // primary key
-  addedAt: string      // ISO timestamp
+  code: string // primary key
+  addedAt: string // ISO timestamp
 }
 ```
 
@@ -150,16 +150,16 @@ On opening "Add sale" form for stock `S`:
 ## 6. Storage
 
 - One Zustand store per record type with `persist` to localStorage.
-- Key namespace: `yangdipercuan:*`
+- Key namespace: `granary:*`
 
-| Key                          | Contents                                |
-| ---------------------------- | --------------------------------------- |
-| `yangdipercuan:purchases`    | `Purchase[]`                            |
-| `yangdipercuan:sales`        | `Sale[]`                                |
-| `yangdipercuan:dividends`    | `Dividend[]`                            |
-| `yangdipercuan:watchlist`    | `WatchlistItem[]`                       |
-| `yangdipercuan:settings`     | UI prefs (theme override, sort prefs)   |
-| `yangdipercuan:stockMeta`    | Cache of Yahoo `{code → {name, sector}}` |
+| Key                 | Contents                                 |
+| ------------------- | ---------------------------------------- |
+| `granary:purchases` | `Purchase[]`                             |
+| `granary:sales`     | `Sale[]`                                 |
+| `granary:dividends` | `Dividend[]`                             |
+| `granary:watchlist` | `WatchlistItem[]`                        |
+| `granary:settings`  | UI prefs (theme override, sort prefs)    |
+| `granary:stockMeta` | Cache of Yahoo `{code → {name, sector}}` |
 
 No migration from legacy `stockidx-watchlist`. Fresh start.
 
@@ -203,7 +203,7 @@ ghi-789,2026-04-10,BBCA,205
 
 ### 7.3 Export flow
 
-- One-click "Export bundle" → builds the multi-section CSV, downloads as `yangdipercuan-YYYY-MM-DD.csv`.
+- One-click "Export bundle" → builds the multi-section CSV, downloads as `granary-YYYY-MM-DD.csv`.
 
 ## 8. Pages
 
@@ -217,12 +217,12 @@ Sections (top to bottom on mobile):
    - **Net Capital Change** (IDR + %), color-coded
    - Realized Gain (IDR)
    - Total Dividends (IDR)
-2. **Allocation chart** — donut. Default view: by issuer. Toggle: issuer ↔ sector. Slices have no labels; legend lists each entry with IDR + %. Sector lookup via `yangdipercuan:stockMeta` cache, falls back to "Unknown".
+2. **Allocation chart** — donut. Default view: by issuer. Toggle: issuer ↔ sector. Slices have no labels; legend lists each entry with IDR + %. Sector lookup via `granary:stockMeta` cache, falls back to "Unknown".
 3. **Performance vs IHSG** — TWR line chart. Two lines: Portfolio TWR, IHSG (`^JKSE`) cumulative return. Both indexed to 100 at window start. Window selector: `1M`, `3M`, `6M`, `YTD`, `1Y`, `ALL`. Default `1Y`. ALL = since first `Purchase.date`. Daily samples (close prices from Yahoo `/api/stocks/history`).
 4. **Holdings table** — sortable columns. Click row → expand inline drill-down (purchases + sales + dividends for that stock). Click code link → `/stocks/[code]`.
 
-   | Stock Code | Lots | Avg Cost | Last Price | Invested Value | Market Value | %Δ | Allocation % |
-   | ---------- | ---- | -------- | ---------- | -------------- | ------------ | -- | ------------ |
+   | Stock Code | Lots | Avg Cost | Last Price | Invested Value | Market Value | %Δ  | Allocation % |
+   | ---------- | ---- | -------- | ---------- | -------------- | ------------ | --- | ------------ |
 
    Default sort: Stock Code asc.
 
@@ -282,11 +282,11 @@ Existing implementation kept (StockDetail, TimeframeSelector, CandlestickChart, 
 
 ### 9.5 Empty state
 
-- First-run: opens an onboarding modal explaining "Import CSV bundle" vs "Add transactions manually". Modal can be dismissed; never reappears (flag in `yangdipercuan:settings`).
+- First-run: opens an onboarding modal explaining "Import CSV bundle" vs "Add transactions manually". Modal can be dismissed; never reappears (flag in `granary:settings`).
 
 ### 9.6 Stock metadata
 
-- Yahoo `quoteSummary.assetProfile` for sector + name. Cache hits in `yangdipercuan:stockMeta`. On first encounter of a new code (via add-purchase form, watchlist add, etc.), fetch + cache. Sector unknown → label "Unknown".
+- Yahoo `quoteSummary.assetProfile` for sector + name. Cache hits in `granary:stockMeta`. On first encounter of a new code (via add-purchase form, watchlist add, etc.), fetch + cache. Sector unknown → label "Unknown".
 - Yahoo `search()` for ticker lookup. Filter results to those ending `.JK`.
 
 ### 9.7 Validation
@@ -300,30 +300,37 @@ Existing implementation kept (StockDetail, TimeframeSelector, CandlestickChart, 
 Disposal is hybrid (per Q34 grill answer):
 
 ### Phase 0 — Cleanup PR
+
 - Delete: `(dashboard)/{login,onboard,settings,chat,recommendations,dashboard}`, `api/{auth,users,chat}`, `components/{recommendations,risk-profile}`, `lib/{auth,auth-client,risk-scoring}.ts`, `mocks/`, `useAuth`, `useRiskProfile`, `IDX_STOCKS`, `SECTORS`, `public/mockServiceWorker.js`.
 - Drop deps: `better-auth`, `better-sqlite3`, `msw`.
 - Remove MSW initialization in `Providers`.
-- Rename brand to "Yang Dipercuan" in metadata, `package.json`, page titles.
+- Rename brand to "Granary" in metadata, `package.json`, page titles.
 - Replace stale docs with this PRD set.
 
 ### Phase 1 — Data layer
+
 - `papaparse`, `date-fns` deps.
 - Zustand stores: `usePurchases`, `useSales`, `useDividends`, `useWatchlist` (new key namespace).
 - `lib/portfolio.ts` derivation utilities (qty, avg cost, realized PL, dividend joins).
 - `lib/csv.ts` multi-section bundle parser/serializer.
 
 ### Phase 2 — Pages
+
 - `/portfolio` summary + allocation chart + holdings table (no TWR yet).
 - `/purchases`, `/sales`, `/dividends` with add/edit/delete + CSV bundle import/export shared component.
 
 ### Phase 3 — Charts
+
 - TWR vs IHSG with daily-close fetch loop. Allocation toggle (issuer/sector).
 
 ### Phase 4 — Watchlist
+
 - Yahoo search component (`.JK` filter), watchlist page + store.
 
 ### Phase 5 — Polish
+
 - Onboarding modal, theme toggle in header, drill-down accordion on holdings, soft-warn dialogs, cascade-delete preview.
 
 ### Phase 6 — Deferred
+
 - AI chat (see future-enhancements).

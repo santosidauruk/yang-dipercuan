@@ -43,12 +43,12 @@ describe('useWatchlist', () => {
     expect(useWatchlist.getState().has('PGAS')).toBe(false)
   })
 
-  it('persists items under yangdipercuan:watchlist', () => {
+  it('persists items under granary:watchlist', () => {
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
     useWatchlist.getState().addItem('BBCA')
 
     const calls = setItem.mock.calls.filter(
-      ([key]) => key === 'yangdipercuan:watchlist'
+      ([key]) => key === 'granary:watchlist'
     )
     expect(calls.length).toBeGreaterThan(0)
     setItem.mockRestore()

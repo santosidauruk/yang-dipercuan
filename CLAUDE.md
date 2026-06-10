@@ -4,7 +4,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Project
 
-Yang Dipercuan — a Next.js 16 (App Router, React 19) web app for tracking Indonesian (IDX / `.JK`) stocks and managing a personal portfolio (purchases, sales, dividends, watchlist). Monorepo-style layout (`backend/`, `frontend/`, `docs/`); this `CLAUDE.md` covers `frontend/`, currently the only active code.
+Granary — a Next.js 16 (App Router, React 19) web app for tracking Indonesian (IDX / `.JK`) stocks and managing a personal portfolio (purchases, sales, dividends, watchlist). Monorepo-style layout (`backend/`, `frontend/`, `docs/`); this `CLAUDE.md` covers `frontend/`, currently the only active code.
 
 The backend does not exist yet. All persistence is client-side `localStorage` via Zustand `persist` middleware; only stock market data is real, served through Next.js Route Handlers wrapping Yahoo Finance.
 
@@ -27,10 +27,10 @@ npm run format:check # prettier --check .
 
 ### Data flow
 
-| Domain                                              | Source                            | Where                                                                                                                     |
-| --------------------------------------------------- | --------------------------------- | ------------------------------------------------------------------------------------------------------------------------- |
-| Stock quotes / history / search                     | **Real** Yahoo via `yahoo-finance2` | Server-only in [src/app/api/stocks/](src/app/api/stocks/), wrapped by [src/lib/yahoo-finance.ts](src/lib/yahoo-finance.ts) |
-| Purchases / sales / dividends / watchlist / metadata | **Local** Zustand `persist`        | Stores in [src/stores/](src/stores/), persisted to `localStorage`                                                         |
+| Domain                                               | Source                              | Where                                                                                                                      |
+| ---------------------------------------------------- | ----------------------------------- | -------------------------------------------------------------------------------------------------------------------------- |
+| Stock quotes / history / search                      | **Real** Yahoo via `yahoo-finance2` | Server-only in [src/app/api/stocks/](src/app/api/stocks/), wrapped by [src/lib/yahoo-finance.ts](src/lib/yahoo-finance.ts) |
+| Purchases / sales / dividends / watchlist / metadata | **Local** Zustand `persist`         | Stores in [src/stores/](src/stores/), persisted to `localStorage`                                                          |
 
 `yahoo-finance2` MUST stay server-side (browser CORS). Always go through a Route Handler under `src/app/api/stocks/`; never import `@/lib/yahoo-finance` from a client component.
 
@@ -59,11 +59,11 @@ Page files are thin: `(dashboard)/<domain>/page.tsx` typically just renders `<Do
 ### Client state layers
 
 - **TanStack Query** ([src/hooks/](src/hooks/)) — server state, all API calls. Defaults: `staleTime: 30s`, `refetchOnWindowFocus: false` (set in `Providers`).
-- **Zustand** ([src/stores/](src/stores/)) — client state. Stores using `persist` write to `localStorage` under the **`yangdipercuan:*` namespace** (`yangdipercuan:purchases`, `:sales`, `:dividends`, `:watchlist`, `:stockMeta`). Never reuse legacy `stockidx-*` keys — they were retired in Phase 0 with no migration.
+- **Zustand** ([src/stores/](src/stores/)) — client state. Stores using `persist` write to `localStorage` under the **`granary:*` namespace** (`granary:purchases`, `:sales`, `:dividends`, `:watchlist`, `:stockMeta`). Never reuse legacy `stockidx-*` keys — they were retired in Phase 0 with no migration.
 
 ### Stock metadata cache
 
-`useStockMeta` ([src/stores/useStockMeta.ts](src/stores/useStockMeta.ts)) is the canonical `code → {name, sector}` map, persisted at `yangdipercuan:stockMeta`. Populate via `setMeta(code, {name, sector})` whenever a search result is selected (purchases, sales, dividends, watchlist all do this); read `meta[code]?.name` for display instead of refetching `/api/stocks/[code]`. Lookups return `undefined` for unknown codes — fall back to the bare code.
+`useStockMeta` ([src/stores/useStockMeta.ts](src/stores/useStockMeta.ts)) is the canonical `code → {name, sector}` map, persisted at `granary:stockMeta`. Populate via `setMeta(code, {name, sector})` whenever a search result is selected (purchases, sales, dividends, watchlist all do this); read `meta[code]?.name` for display instead of refetching `/api/stocks/[code]`. Lookups return `undefined` for unknown codes — fall back to the bare code.
 
 ### Reference data
 
@@ -97,7 +97,7 @@ Longer-form context: [docs/frontend-implementation-plan.md](docs/frontend-implem
 
 ### Issue tracker
 
-GitHub Issues at `santosidauruk/yang-dipercuan` via `gh` CLI. See [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md).
+GitHub Issues are inferred from the current `git remote` via `gh` CLI. See [docs/agents/issue-tracker.md](docs/agents/issue-tracker.md).
 
 ### Triage labels
 

@@ -17,7 +17,12 @@ export const useWatchlist = create<WatchlistStore>()(
         set((state) =>
           state.items.some((i) => i.code === code)
             ? state
-            : { items: [...state.items, { code, addedAt: new Date().toISOString() }] }
+            : {
+                items: [
+                  ...state.items,
+                  { code, addedAt: new Date().toISOString() }
+                ]
+              }
         ),
       removeItem: (code) =>
         set((state) => ({
@@ -25,6 +30,6 @@ export const useWatchlist = create<WatchlistStore>()(
         })),
       has: (code) => get().items.some((i) => i.code === code)
     }),
-    { name: 'yangdipercuan:watchlist' }
+    { name: 'granary:watchlist' }
   )
 )

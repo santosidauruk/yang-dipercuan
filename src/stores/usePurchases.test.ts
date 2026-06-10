@@ -70,14 +70,14 @@ describe('usePurchases', () => {
     expect(usePurchases.getState().purchases).toEqual([])
   })
 
-  it('persists purchases under yangdipercuan:purchases', () => {
+  it('persists purchases under granary:purchases', () => {
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
     usePurchases
       .getState()
       .addPurchase({ date: '2026-01-15', code: 'BBCA', price: 9500, lots: 5 })
 
     const calls = setItem.mock.calls.filter(
-      ([key]) => key === 'yangdipercuan:purchases'
+      ([key]) => key === 'granary:purchases'
     )
     expect(calls.length).toBeGreaterThan(0)
     setItem.mockRestore()
