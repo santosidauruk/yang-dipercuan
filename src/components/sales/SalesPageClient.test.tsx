@@ -110,6 +110,54 @@ describe('SalesPageClient soft-warn on oversold sale', () => {
     ).toBe('BBCA')
   })
 
+  it.skip('placeholder for grouping', () => {})
+})
+
+describe('SalesPageClient CSV import', () => {
+  it('appends valid rows', async () => {
+    const user = userEvent.setup()
+    renderWithQuery(<SalesPageClient />)
+
+    const file = new File(
+      ['id,date,code,price,lots,costBasis\ns1,2026-02-01,BBCA,10000,3,9000\n'],
+      'sales.csv',
+      { type: 'text/csv' }
+    )
+    const input = screen.getByTestId('csv-import-input') as HTMLInputElement
+    await user.upload(input, file)
+
+    await waitFor(() => expect(useSales.getState().sales).toHaveLength(1))
+    expect(useSales.getState().sales[0]).toMatchObject({
+      id: 's1',
+      code: 'BBCA',
+      lots: 3,
+      costBasis: 9000
+    })
+  })
+
+  it('shows error dialog on invalid row', async () => {
+    const user = userEvent.setup()
+    renderWithQuery(<SalesPageClient />)
+
+    const file = new File(
+      [
+        'id,date,code,price,lots,costBasis\n' +
+          's1,2026-02-01,BBCA,10000,3,0\n'
+      ],
+      'sales.csv',
+      { type: 'text/csv' }
+    )
+    const input = screen.getByTestId('csv-import-input') as HTMLInputElement
+    await user.upload(input, file)
+
+    expect(
+      await screen.findByRole('heading', { name: /import failed/i })
+    ).toBeInTheDocument()
+    expect(useSales.getState().sales).toHaveLength(0)
+  })
+})
+
+describe('SalesPageClient soft-warn extra group', () => {
   it('does NOT reopen form when SoftWarn dismissed via Escape', async () => {
     const user = await submitOversoldSale()
 

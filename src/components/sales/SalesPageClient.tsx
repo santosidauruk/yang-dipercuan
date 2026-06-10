@@ -25,6 +25,10 @@ import { qty } from '@/lib/portfolio'
 import { SaleFormDialog, type SaleFormValues } from './SaleFormDialog'
 import { SalesTable } from './SalesTable'
 import { SoftWarnDialog } from '@/components/common/SoftWarnDialog'
+import { CsvActions } from '@/components/common/CsvActions'
+import { serializeSales, parseSales } from '@/lib/csv-sales'
+import { CsvImportError } from '@/lib/csv-purchases'
+import { todayISO } from '@/lib/date'
 import type { Sale } from '@/types'
 
 type SortKey = 'date-desc' | 'code-asc'
@@ -45,6 +49,7 @@ export function SalesPageClient() {
     heldLots: number
   } | null>(null)
   const [draft, setDraft] = useState<SaleFormValues | null>(null)
+  const [importError, setImportError] = useState<string | null>(null)
 
   const uniqueCodes = useMemo(
     () => Array.from(new Set(sales.map((s) => s.code))).sort(),
@@ -113,6 +118,17 @@ export function SalesPageClient() {
     }
   }
 
+  const handleImport = (text: string) => {
+    try {
+      const parsed = parseSales(text)
+      parsed.forEach((s) => addSale(s))
+      toast.success(`${parsed.length} sales imported`)
+    } catch (e) {
+      setImportError(
+        e instanceof CsvImportError ? e.message : 'Could not parse CSV'
+      )
+    }
+  }
   const toggleFilter = (code: string) => {
     setFilterCodes((cur) =>
       cur.includes(code) ? cur.filter((c) => c !== code) : [...cur, code]
@@ -139,6 +155,14 @@ export function SalesPageClient() {
             Add
           </Button>
         </div>
+      </div>
+
+      <div className="flex flex-wrap items-center justify-end gap-2">
+        <CsvActions
+          filename={`sales-${todayISO()}.csv`}
+          buildCsv={() => serializeSales(sales)}
+          onImport={handleImport}
+        />
       </div>
 
       <div className="flex flex-wrap items-center gap-2">
@@ -229,6 +253,18 @@ export function SalesPageClient() {
             setDialogOpen(true)
           }
         }}
+      />
+
+      <SoftWarnDialog
+        open={importError !== null}
+        onOpenChange={(open) => {
+          if (!open) setImportError(null)
+        }}
+        title="Import failed"
+        description={importError ? <p>{importError}. No rows imported.</p> : null}
+        confirmLabel="OK"
+        cancelLabel="Close"
+        onConfirm={() => setImportError(null)}
       />
     </div>
   )

@@ -23,7 +23,7 @@ export function SummaryCard({ summary }: SummaryCardProps) {
 
   return (
     <Card>
-      <CardContent className="grid gap-4 sm:grid-cols-2 lg:grid-cols-5">
+      <CardContent className="grid gap-4 grid-cols-2">
         <Stat label="Total Invested" value={formatCurrency(summary.totalInvested)} />
         <Stat
           label="Total Current Value"
