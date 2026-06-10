@@ -12,8 +12,8 @@ export function csvSerialize<T extends CsvRow>(
   rows: T[],
   columns: Record<keyof T, string>
 ): string {
-  const header = Object.values(columns).join(',')
-  const headerKeys = Object.keys(columns)
+  const headerKeys = Object.keys(columns) as (keyof T)[]
+  const header = headerKeys.map((k) => columns[k]).join(',')
   const lines = rows.map((row) =>
     headerKeys.map((k) => escapeField(row[k])).join(',')
   )
@@ -83,7 +83,6 @@ export function csvParse(text: string): Record<string, string>[] {
   if (text.length === 0) return []
 
   const headerRes = parseLine(text, 0)
-  console.log({ headerRes })
   const headers = headerRes.fields
   const rows: Record<string, string>[] = []
   let i = headerRes.next

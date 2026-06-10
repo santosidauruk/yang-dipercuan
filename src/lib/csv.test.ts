@@ -2,8 +2,8 @@ import { describe, it, expect } from 'vitest'
 import { csvSerialize, csvParse } from './csv'
 
 describe('csvSerialize', () => {
-  it('writes header row from object keys in given order', () => {
-    const out = csvSerialize([{ a: 1, b: 'x' }], ['a', 'b'])
+  it('writes header row from columns map in given order', () => {
+    const out = csvSerialize([{ a: 1, b: 'x' }], { a: 'a', b: 'b' })
     expect(out.split('\n')[0]).toBe('a,b')
   })
 
@@ -13,29 +13,32 @@ describe('csvSerialize', () => {
         { a: 1, b: 'x' },
         { a: 2, b: 'y' }
       ],
-      ['a', 'b']
+      { a: 'a', b: 'b' }
     )
     expect(out.trim().split('\n')).toEqual(['a,b', '1,x', '2,y'])
   })
 
   it('quotes fields containing comma', () => {
-    const out = csvSerialize([{ a: 'one, two', b: 1 }], ['a', 'b'])
+    const out = csvSerialize([{ a: 'one, two', b: 1 }], { a: 'a', b: 'b' })
     expect(out.trim().split('\n')[1]).toBe('"one, two",1')
   })
 
   it('quotes fields containing double-quote and escapes by doubling', () => {
-    const out = csvSerialize([{ a: 'he said "hi"' }], ['a'])
+    const out = csvSerialize([{ a: 'he said "hi"' }], { a: 'a' })
     expect(out.trim().split('\n')[1]).toBe('"he said ""hi"""')
   })
 
   it('quotes fields containing newline', () => {
-    const out = csvSerialize([{ a: 'line1\nline2' }], ['a'])
+    const out = csvSerialize([{ a: 'line1\nline2' }], { a: 'a' })
     expect(out.trim().split('\n').length).toBeGreaterThan(2)
     expect(out).toContain('"line1\nline2"')
   })
 
   it('renders missing keys as empty', () => {
-    const out = csvSerialize([{ a: 1 }], ['a', 'b'])
+    const out = csvSerialize([{ a: 1 } as { a: number; b?: string }], {
+      a: 'a',
+      b: 'b'
+    })
     expect(out.trim().split('\n')[1]).toBe('1,')
   })
 })
@@ -74,7 +77,11 @@ describe('csvParse', () => {
       { id: 'p1', code: 'BBCA', note: 'normal' },
       { id: 'p2', code: 'PGAS', note: 'has, comma "and" quote' }
     ]
-    const text = csvSerialize(input, ['id', 'code', 'note'])
+    const text = csvSerialize(input, {
+      id: 'id',
+      code: 'code',
+      note: 'note'
+    })
     expect(csvParse(text)).toEqual(
       input.map((r) => ({ id: r.id, code: r.code, note: r.note }))
     )

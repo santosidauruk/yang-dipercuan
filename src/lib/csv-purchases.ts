@@ -65,7 +65,6 @@ function parsePositiveNumber(
   row: number,
   field: string
 ): number {
-  console.log({ value })
   const n = Number(value)
   if (!Number.isFinite(n) || n <= 0) {
     throw new CsvImportError(row, `${field} must be a positive number`)
@@ -81,8 +80,25 @@ function parsePositiveInt(value: string, row: number, field: string): number {
   return n
 }
 
+const HEADER_ALIASES: Record<string, keyof typeof CANONICAL> = Object.entries(
+  CANONICAL
+).reduce<Record<string, keyof typeof CANONICAL>>((acc, [key, label]) => {
+  acc[label] = key as keyof typeof CANONICAL
+  return acc
+}, {})
+
+function normalizeRow(r: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = { ...r }
+  for (const [label, key] of Object.entries(HEADER_ALIASES)) {
+    if (out[key] === undefined && r[label] !== undefined) {
+      out[key] = r[label]
+    }
+  }
+  return out
+}
+
 export function parsePurchases(text: string): Purchase[] {
-  const raw = csvParse(text)
+  const raw = csvParse(text).map(normalizeRow)
   const out: Purchase[] = []
   const seenIds = new Set<string>()
 
@@ -100,9 +116,7 @@ export function parsePurchases(text: string): Purchase[] {
     }
 
     const price = parsePositiveNumber(r.price ?? '', rowNum, 'price')
-    console.log({ price })
     const lots = parsePositiveInt(r.lots ?? '', rowNum, 'lots')
-    console.log({ lots })
 
     let id = (r.id ?? '').trim()
     if (!id || seenIds.has(id)) {

@@ -6,16 +6,16 @@ import { dividendRow } from './portfolio'
 const CODE_RE = /^[A-Z]{3,5}$/
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
-const EXPORT_COLUMNS = [
-  'id',
-  'date',
-  'code',
-  'dps',
-  'qtyHeld',
-  'totalDividend',
-  'yieldPct',
-  'purchaseValue'
-] as const
+export const EXPORT_COLUMNS = {
+  id: 'ID',
+  date: 'Tanggal Penerimaan',
+  code: 'Kode Saham',
+  dps: 'DPS',
+  qtyHeld: 'Jumlah Lot',
+  totalDividend: 'Total Dividen',
+  yieldPct: 'Yield %',
+  purchaseValue: 'Nilai Investasi'
+} as const
 
 interface SerializeExtras {
   purchases?: Purchase[]
@@ -52,7 +52,7 @@ export function serializeDividends(
       purchaseValue: row.purchaseValue
     }
   })
-  return csvSerialize(rows, EXPORT_COLUMNS as unknown as string[])
+  return csvSerialize(rows, EXPORT_COLUMNS)
 }
 
 function positive(value: string, row: number, field: string): number {
@@ -63,8 +63,26 @@ function positive(value: string, row: number, field: string): number {
   return n
 }
 
+const HEADER_ALIASES: Record<string, keyof typeof EXPORT_COLUMNS> =
+  Object.entries(EXPORT_COLUMNS).reduce<
+    Record<string, keyof typeof EXPORT_COLUMNS>
+  >((acc, [key, label]) => {
+    acc[label] = key as keyof typeof EXPORT_COLUMNS
+    return acc
+  }, {})
+
+function normalizeRow(r: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = { ...r }
+  for (const [label, key] of Object.entries(HEADER_ALIASES)) {
+    if (out[key] === undefined && r[label] !== undefined) {
+      out[key] = r[label]
+    }
+  }
+  return out
+}
+
 export function parseDividends(text: string): Dividend[] {
-  const raw = csvParse(text)
+  const raw = csvParse(text).map(normalizeRow)
   const out: Dividend[] = []
   const seen = new Set<string>()
 

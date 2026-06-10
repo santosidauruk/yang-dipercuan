@@ -81,7 +81,7 @@ export function HoldingsTable({ rows, renderDrillDown }: HoldingsTableProps) {
               sortDir={sortDir}
               onSort={onSort}
             >
-              Stock Code
+              Kode Saham
             </SortableHead>
             <SortableHead
               k="lots"
@@ -90,7 +90,7 @@ export function HoldingsTable({ rows, renderDrillDown }: HoldingsTableProps) {
               onSort={onSort}
               align="right"
             >
-              Lots
+              Jumlah Lot
             </SortableHead>
             <SortableHead
               k="avgCost"
@@ -99,7 +99,7 @@ export function HoldingsTable({ rows, renderDrillDown }: HoldingsTableProps) {
               onSort={onSort}
               align="right"
             >
-              Avg Cost
+              Harga Rata-rata
             </SortableHead>
             <SortableHead
               k="lastPrice"
@@ -108,7 +108,7 @@ export function HoldingsTable({ rows, renderDrillDown }: HoldingsTableProps) {
               onSort={onSort}
               align="right"
             >
-              Last Price
+              Harga Terakhir
             </SortableHead>
             <SortableHead
               k="invested"
@@ -117,7 +117,7 @@ export function HoldingsTable({ rows, renderDrillDown }: HoldingsTableProps) {
               onSort={onSort}
               align="right"
             >
-              Invested Value
+              Nilai Investasi
             </SortableHead>
             <SortableHead
               k="marketValue"
@@ -126,7 +126,7 @@ export function HoldingsTable({ rows, renderDrillDown }: HoldingsTableProps) {
               onSort={onSort}
               align="right"
             >
-              Market Value
+              Nilai Pasar
             </SortableHead>
             <SortableHead
               k="pct"
@@ -135,7 +135,7 @@ export function HoldingsTable({ rows, renderDrillDown }: HoldingsTableProps) {
               onSort={onSort}
               align="right"
             >
-              %Δ
+              Kenaikan/Penurunan
             </SortableHead>
             <SortableHead
               k="allocationPct"
@@ -144,7 +144,7 @@ export function HoldingsTable({ rows, renderDrillDown }: HoldingsTableProps) {
               onSort={onSort}
               align="right"
             >
-              Allocation %
+              Alokasi %
             </SortableHead>
           </TableRow>
         </TableHeader>

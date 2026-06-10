@@ -17,7 +17,7 @@ describe('serializeSales', () => {
     const text = serializeSales([sell('BBCA', '2026-02-01', 3, 10000, 9000)])
     const lines = text.trim().split('\n')
     expect(lines[0]).toBe(
-      'id,date,code,price,lots,costBasis,purchaseValue,sellValue,capitalGain,percentChange'
+      'ID,Tanggal Penjualan,Kode Saham,Harga Penjualan,Jumlah Lot,Harga Beli Rata-Rata,Nilai Investasi,Nilai Penjualan,Keuntungan Modal,Kenaikan/Penurunan'
     )
     // shares = 300; purchaseValue=2_700_000; sellValue=3_000_000; gain=300_000; pct≈11.1111
     expect(lines[1]).toBe(

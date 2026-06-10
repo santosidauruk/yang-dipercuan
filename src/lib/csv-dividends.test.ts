@@ -23,7 +23,7 @@ describe('serializeDividends', () => {
     const text = serializeDividends([div('BBCA', '2026-04-01', 50)])
     const lines = text.trim().split('\n')
     expect(lines[0]).toBe(
-      'id,date,code,dps,qtyHeld,totalDividend,yieldPct,purchaseValue'
+      'ID,Tanggal Penerimaan,Kode Saham,DPS,Jumlah Lot,Total Dividen,Yield %,Nilai Investasi'
     )
     expect(lines[1]).toBe('d-BBCA-2026-04-01,2026-04-01,BBCA,50,,,,')
   })

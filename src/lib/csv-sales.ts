@@ -6,18 +6,18 @@ const SHARES_PER_LOT = 100
 const CODE_RE = /^[A-Z]{3,5}$/
 const DATE_RE = /^\d{4}-\d{2}-\d{2}$/
 
-const EXPORT_COLUMNS = [
-  'id',
-  'date',
-  'code',
-  'price',
-  'lots',
-  'costBasis',
-  'purchaseValue',
-  'sellValue',
-  'capitalGain',
-  'percentChange'
-] as const
+export const EXPORT_COLUMNS = {
+  id: 'ID',
+  date: 'Tanggal Penjualan',
+  code: 'Kode Saham',
+  price: 'Harga Penjualan',
+  lots: 'Jumlah Lot',
+  costBasis: 'Harga Beli Rata-Rata',
+  purchaseValue: 'Nilai Investasi',
+  sellValue: 'Nilai Penjualan',
+  capitalGain: 'Keuntungan Modal',
+  percentChange: 'Kenaikan/Penurunan'
+} as const
 
 export function serializeSales(sales: Sale[]): string {
   const rows = sales.map((s) => {
@@ -42,7 +42,7 @@ export function serializeSales(sales: Sale[]): string {
       percentChange: pct
     }
   })
-  return csvSerialize(rows, EXPORT_COLUMNS as unknown as string[])
+  return csvSerialize(rows, EXPORT_COLUMNS)
 }
 
 function positive(value: string, row: number, field: string): number {
@@ -61,8 +61,26 @@ function positiveInt(value: string, row: number, field: string): number {
   return n
 }
 
+const HEADER_ALIASES: Record<string, keyof typeof EXPORT_COLUMNS> =
+  Object.entries(EXPORT_COLUMNS).reduce<
+    Record<string, keyof typeof EXPORT_COLUMNS>
+  >((acc, [key, label]) => {
+    acc[label] = key as keyof typeof EXPORT_COLUMNS
+    return acc
+  }, {})
+
+function normalizeRow(r: Record<string, string>): Record<string, string> {
+  const out: Record<string, string> = { ...r }
+  for (const [label, key] of Object.entries(HEADER_ALIASES)) {
+    if (out[key] === undefined && r[label] !== undefined) {
+      out[key] = r[label]
+    }
+  }
+  return out
+}
+
 export function parseSales(text: string): Sale[] {
-  const raw = csvParse(text)
+  const raw = csvParse(text).map(normalizeRow)
   const out: Sale[] = []
   const seen = new Set<string>()
 

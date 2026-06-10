@@ -19,7 +19,7 @@ describe('serializePurchases', () => {
     const text = serializePurchases([buy('BBCA', '2026-01-01', 5, 9000)])
     const lines = text.trim().split('\n')
     expect(lines[0]).toBe(
-      'id,date,code,price,lots,lastPrice,percentChange,investedValue'
+      'ID,Tanggal Pembelian,Kode Saham,Harga Beli,Jumlah Lot,Harga Terakhir,Kenaikan/Penurunan,Nilai Investasi'
     )
     expect(lines[1]).toBe('BBCA-2026-01-01,2026-01-01,BBCA,9000,5,,,4500000')
   })
