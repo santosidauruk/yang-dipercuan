@@ -30,13 +30,13 @@ describe('useStockMeta', () => {
     expect(useStockMeta.getState().meta.BBCA.name).toBe('new')
   })
 
-  it('persists under yangdipercuan:stockMeta', () => {
+  it('persists under granary:stockMeta', () => {
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
     useStockMeta
       .getState()
       .setMeta('BBCA', { name: 'X', sector: 'Financial Services' })
     const calls = setItem.mock.calls.filter(
-      ([key]) => key === 'yangdipercuan:stockMeta'
+      ([key]) => key === 'granary:stockMeta'
     )
     expect(calls.length).toBeGreaterThan(0)
     setItem.mockRestore()

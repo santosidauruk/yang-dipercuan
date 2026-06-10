@@ -18,6 +18,6 @@ export const useStockMeta = create<StockMetaStore>()(
       setMeta: (code, meta) =>
         set((state) => ({ meta: { ...state.meta, [code]: meta } }))
     }),
-    { name: 'yangdipercuan:stockMeta' }
+    { name: 'granary:stockMeta' }
   )
 )

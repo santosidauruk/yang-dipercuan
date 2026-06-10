@@ -12,6 +12,6 @@ export const useSettings = create<SettingsStore>()(
       onboardingDismissed: false,
       dismissOnboarding: () => set({ onboardingDismissed: true })
     }),
-    { name: 'yangdipercuan:settings' }
+    { name: 'granary:settings' }
   )
 )

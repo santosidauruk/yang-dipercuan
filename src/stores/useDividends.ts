@@ -29,6 +29,6 @@ export const useDividends = create<DividendsStore>()(
           dividends: state.dividends.filter((d) => d.code !== code)
         }))
     }),
-    { name: 'yangdipercuan:dividends' }
+    { name: 'granary:dividends' }
   )
 )

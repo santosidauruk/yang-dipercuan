@@ -26,12 +26,20 @@ describe('useSales', () => {
   })
 
   it('addSale generates unique ids for separate calls', () => {
-    const a = useSales
-      .getState()
-      .addSale({ date: '2026-02-01', code: 'BBCA', price: 10000, lots: 3, costBasis: 9500 })
-    const b = useSales
-      .getState()
-      .addSale({ date: '2026-02-15', code: 'PGAS', price: 1600, lots: 5, costBasis: 1500 })
+    const a = useSales.getState().addSale({
+      date: '2026-02-01',
+      code: 'BBCA',
+      price: 10000,
+      lots: 3,
+      costBasis: 9500
+    })
+    const b = useSales.getState().addSale({
+      date: '2026-02-15',
+      code: 'PGAS',
+      price: 1600,
+      lots: 5,
+      costBasis: 1500
+    })
     expect(a.id).not.toEqual(b.id)
   })
 
@@ -54,9 +62,13 @@ describe('useSales', () => {
   })
 
   it('updateSale ignores unknown ids', () => {
-    useSales
-      .getState()
-      .addSale({ date: '2026-02-01', code: 'BBCA', price: 10000, lots: 3, costBasis: 9500 })
+    useSales.getState().addSale({
+      date: '2026-02-01',
+      code: 'BBCA',
+      price: 10000,
+      lots: 3,
+      costBasis: 9500
+    })
     useSales.getState().updateSale('does-not-exist', { lots: 99 })
     expect(useSales.getState().sales[0].lots).toBe(3)
   })
@@ -74,15 +86,27 @@ describe('useSales', () => {
   })
 
   it('removeSalesByCode deletes all sales for a code', () => {
-    useSales
-      .getState()
-      .addSale({ date: '2026-02-01', code: 'BBCA', price: 10000, lots: 3, costBasis: 9500 })
-    useSales
-      .getState()
-      .addSale({ date: '2026-02-10', code: 'BBCA', price: 10200, lots: 2, costBasis: 9500 })
-    useSales
-      .getState()
-      .addSale({ date: '2026-02-05', code: 'PGAS', price: 1600, lots: 5, costBasis: 1500 })
+    useSales.getState().addSale({
+      date: '2026-02-01',
+      code: 'BBCA',
+      price: 10000,
+      lots: 3,
+      costBasis: 9500
+    })
+    useSales.getState().addSale({
+      date: '2026-02-10',
+      code: 'BBCA',
+      price: 10200,
+      lots: 2,
+      costBasis: 9500
+    })
+    useSales.getState().addSale({
+      date: '2026-02-05',
+      code: 'PGAS',
+      price: 1600,
+      lots: 5,
+      costBasis: 1500
+    })
 
     useSales.getState().removeSalesByCode('BBCA')
 
@@ -91,15 +115,17 @@ describe('useSales', () => {
     expect(remaining[0].code).toBe('PGAS')
   })
 
-  it('persists sales under yangdipercuan:sales', () => {
+  it('persists sales under granary:sales', () => {
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
-    useSales
-      .getState()
-      .addSale({ date: '2026-02-01', code: 'BBCA', price: 10000, lots: 3, costBasis: 9500 })
+    useSales.getState().addSale({
+      date: '2026-02-01',
+      code: 'BBCA',
+      price: 10000,
+      lots: 3,
+      costBasis: 9500
+    })
 
-    const calls = setItem.mock.calls.filter(
-      ([key]) => key === 'yangdipercuan:sales'
-    )
+    const calls = setItem.mock.calls.filter(([key]) => key === 'granary:sales')
     expect(calls.length).toBeGreaterThan(0)
     setItem.mockRestore()
   })

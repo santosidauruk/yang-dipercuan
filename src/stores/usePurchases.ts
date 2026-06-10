@@ -32,6 +32,6 @@ export const usePurchases = create<PurchasesStore>()(
           purchases: state.purchases.filter((p) => p.id !== id)
         }))
     }),
-    { name: 'yangdipercuan:purchases' }
+    { name: 'granary:purchases' }
   )
 )

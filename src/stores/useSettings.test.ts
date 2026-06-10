@@ -16,12 +16,12 @@ describe('useSettings', () => {
     expect(useSettings.getState().onboardingDismissed).toBe(true)
   })
 
-  it('persists under yangdipercuan:settings', () => {
+  it('persists under granary:settings', () => {
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
     useSettings.getState().dismissOnboarding()
 
     const calls = setItem.mock.calls.filter(
-      ([key]) => key === 'yangdipercuan:settings'
+      ([key]) => key === 'granary:settings'
     )
     expect(calls.length).toBeGreaterThan(0)
     setItem.mockRestore()

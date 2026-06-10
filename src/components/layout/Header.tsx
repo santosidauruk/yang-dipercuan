@@ -13,7 +13,7 @@ export function Header() {
           className="flex items-center gap-2 text-lg font-bold"
         >
           <TrendingUp className="text-primary h-5 w-5" />
-          <span>Yang Dipercuan</span>
+          <span>Granary</span>
         </Link>
 
         <div className="ml-auto flex items-center gap-2">

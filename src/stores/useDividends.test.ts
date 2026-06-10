@@ -69,14 +69,14 @@ describe('useDividends', () => {
     expect(remaining[0].code).toBe('PGAS')
   })
 
-  it('persists dividends under yangdipercuan:dividends', () => {
+  it('persists dividends under granary:dividends', () => {
     const setItem = vi.spyOn(Storage.prototype, 'setItem')
     useDividends
       .getState()
       .addDividend({ date: '2026-03-01', code: 'BBCA', dps: 50 })
 
     const calls = setItem.mock.calls.filter(
-      ([key]) => key === 'yangdipercuan:dividends'
+      ([key]) => key === 'granary:dividends'
     )
     expect(calls.length).toBeGreaterThan(0)
     setItem.mockRestore()

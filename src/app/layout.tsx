@@ -15,7 +15,7 @@ const geistMono = Geist_Mono({
 })
 
 export const metadata: Metadata = {
-  title: 'Yang Dipercuan',
+  title: 'Granary',
   description:
     'Personal IDX stock portfolio tracker. Browser-only data, Yahoo Finance for market quotes.'
 }

@@ -35,6 +35,6 @@ export const useSales = create<SalesStore>()(
           sales: state.sales.filter((s) => s.code !== code)
         }))
     }),
-    { name: 'yangdipercuan:sales' }
+    { name: 'granary:sales' }
   )
 )

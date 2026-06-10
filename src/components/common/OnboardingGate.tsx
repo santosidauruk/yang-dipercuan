@@ -28,7 +28,7 @@ export function OnboardingGate() {
     <Dialog open={open} onOpenChange={handleOpenChange}>
       <DialogContent>
         <DialogHeader>
-          <DialogTitle>Welcome to Yang Dipercuan</DialogTitle>
+          <DialogTitle>Welcome to Granary</DialogTitle>
           <DialogDescription>
             Track your IDX portfolio locally. No backend, no signup — all data
             lives in this browser.
