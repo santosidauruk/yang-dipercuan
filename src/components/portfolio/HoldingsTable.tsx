@@ -1,17 +1,7 @@
 'use client'
 
 import Link from 'next/link'
-import { Fragment, useState } from 'react'
-import { ArrowDown, ArrowUp, ChevronsUpDown } from 'lucide-react'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table'
-import { Button } from '@/components/ui/button'
+import { useState } from 'react'
 import { cn, formatNumber, formatPercentage } from '@/lib/utils'
 import type { Holding } from '@/lib/portfolio'
 
@@ -22,230 +12,123 @@ export interface HoldingRow extends Holding {
   allocationPct: number
 }
 
-type SortKey =
-  | 'code'
-  | 'lots'
-  | 'avgCost'
-  | 'lastPrice'
-  | 'invested'
-  | 'marketValue'
-  | 'pct'
-  | 'allocationPct'
-type SortDir = 'asc' | 'desc'
-
 interface HoldingsTableProps {
   rows: HoldingRow[]
   renderDrillDown?: (code: string) => React.ReactNode
 }
 
 export function HoldingsTable({ rows, renderDrillDown }: HoldingsTableProps) {
-  const [sortKey, setSortKey] = useState<SortKey>('code')
-  const [sortDir, setSortDir] = useState<SortDir>('asc')
   const [expanded, setExpanded] = useState<string | null>(null)
 
   if (rows.length === 0) {
     return (
-      <div className="text-muted-foreground rounded-md border p-8 text-center text-sm">
-        No holdings yet. Add a purchase to see it here.
+      <div className="border-border/70 bg-card/70 text-muted-foreground rounded-lg border p-8 text-center text-sm">
+        <p className="text-foreground font-medium">No holdings yet.</p>
+        <p className="mt-1">Add a purchase to see it here.</p>
       </div>
     )
   }
 
-  const sorted = [...rows].sort((a, b) => {
-    const av = a[sortKey] ?? 0
-    const bv = b[sortKey] ?? 0
-    const dir = sortDir === 'asc' ? 1 : -1
-    if (typeof av === 'string' && typeof bv === 'string') {
-      return av.localeCompare(bv) * dir
-    }
-    return ((av as number) - (bv as number)) * dir
-  })
-
-  const onSort = (key: SortKey) => {
-    if (sortKey === key) {
-      setSortDir((d) => (d === 'asc' ? 'desc' : 'asc'))
-    } else {
-      setSortKey(key)
-      setSortDir(key === 'code' ? 'asc' : 'desc')
-    }
-  }
+  const sorted = [...rows].sort((a, b) => a.code.localeCompare(b.code))
 
   return (
-    <div className="overflow-x-auto rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <SortableHead
-              k="code"
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSort={onSort}
-            >
-              Kode Saham
-            </SortableHead>
-            <SortableHead
-              k="lots"
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSort={onSort}
-              align="right"
-            >
-              Jumlah Lot
-            </SortableHead>
-            <SortableHead
-              k="avgCost"
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSort={onSort}
-              align="right"
-            >
-              Harga Rata-rata
-            </SortableHead>
-            <SortableHead
-              k="lastPrice"
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSort={onSort}
-              align="right"
-            >
-              Harga Terakhir
-            </SortableHead>
-            <SortableHead
-              k="invested"
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSort={onSort}
-              align="right"
-            >
-              Nilai Investasi
-            </SortableHead>
-            <SortableHead
-              k="marketValue"
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSort={onSort}
-              align="right"
-            >
-              Nilai Pasar
-            </SortableHead>
-            <SortableHead
-              k="pct"
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSort={onSort}
-              align="right"
-            >
-              Kenaikan/Penurunan
-            </SortableHead>
-            <SortableHead
-              k="allocationPct"
-              sortKey={sortKey}
-              sortDir={sortDir}
-              onSort={onSort}
-              align="right"
-            >
-              Alokasi %
-            </SortableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {sorted.map((row) => (
-            <Fragment key={row.code}>
-            <TableRow
-              className={cn(renderDrillDown && 'cursor-pointer')}
-              onClick={() =>
-                renderDrillDown &&
+    <div className="space-y-2.5">
+      {sorted.map((row) => (
+        <div key={row.code}>
+          <article
+            role="row"
+            data-testid={`holding-row-${row.code}`}
+            tabIndex={renderDrillDown ? 0 : undefined}
+            className={cn(
+              'border-border/70 bg-card/80 rounded-lg border p-4 shadow-sm shadow-black/5',
+              renderDrillDown && 'cursor-pointer'
+            )}
+            onClick={() =>
+              renderDrillDown &&
+              setExpanded((cur) => (cur === row.code ? null : row.code))
+            }
+            onKeyDown={(e) => {
+              if (!renderDrillDown) return
+              if (e.key === 'Enter' || e.key === ' ') {
+                e.preventDefault()
                 setExpanded((cur) => (cur === row.code ? null : row.code))
               }
-            >
-              <TableCell className="font-medium">
+            }}
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div className="min-w-0">
                 <Link
                   href={`/stocks/${row.code}`}
-                  className="hover:underline"
+                  className="text-xl font-semibold tracking-tight hover:underline"
                   onClick={(e) => e.stopPropagation()}
                 >
                   {row.code}
                 </Link>
-              </TableCell>
-              <TableCell className="text-right">{row.lots}</TableCell>
-              <TableCell className="text-right">
-                {formatNumber(row.avgCost)}
-              </TableCell>
-              <TableCell className="text-right">
-                {row.lastPrice !== undefined
-                  ? formatNumber(row.lastPrice)
-                  : '—'}
-              </TableCell>
-              <TableCell className="text-right">
-                {formatNumber(row.invested)}
-              </TableCell>
-              <TableCell className="text-right">
-                {formatNumber(row.marketValue)}
-              </TableCell>
-              <TableCell
+                <p className="text-muted-foreground text-sm">
+                  {row.allocationPct.toFixed(2)}% allocation
+                </p>
+              </div>
+              <div
                 className={cn(
-                  'text-right',
+                  'rounded-md border px-2.5 py-1 text-sm font-semibold tabular-nums',
                   row.pct === null && 'text-muted-foreground',
                   row.pct !== null &&
-                    row.pct > 0 &&
-                    'text-emerald-600 dark:text-emerald-400',
+                    row.pct >= 0 &&
+                    'border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
                   row.pct !== null &&
                     row.pct < 0 &&
-                    'text-red-600 dark:text-red-400'
+                    'border-red-500/30 bg-red-500/10 text-red-500'
                 )}
               >
-                {row.pct === null ? '—' : formatPercentage(row.pct)}
-              </TableCell>
-              <TableCell className="text-right">
-                {row.allocationPct.toFixed(2)}%
-              </TableCell>
-            </TableRow>
-            {renderDrillDown && expanded === row.code && (
-              <TableRow>
-                <TableCell colSpan={8} className="p-0">
-                  {renderDrillDown(row.code)}
-                </TableCell>
-              </TableRow>
-            )}
-            </Fragment>
-          ))}
-        </TableBody>
-      </Table>
+                {row.pct === null ? '-' : formatPercentage(row.pct)}
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+              <Metric label="Lots" value={row.lots.toString()} />
+              <Metric
+                label="Average cost"
+                value={formatNumber(row.avgCost)}
+                right
+              />
+              <Metric label="Invested" value={formatNumber(row.invested)} />
+              <Metric
+                label="Market value"
+                value={formatNumber(row.marketValue)}
+                right
+              />
+              <Metric
+                label="Last price"
+                value={
+                  row.lastPrice !== undefined
+                    ? formatNumber(row.lastPrice)
+                    : '-'
+                }
+              />
+            </div>
+          </article>
+          {renderDrillDown &&
+            expanded === row.code &&
+            renderDrillDown(row.code)}
+        </div>
+      ))}
     </div>
   )
 }
 
-function SortableHead({
-  children,
-  k,
-  sortKey,
-  sortDir,
-  onSort,
-  align = 'left'
+function Metric({
+  label,
+  value,
+  right
 }: {
-  children: React.ReactNode
-  k: SortKey
-  sortKey: SortKey
-  sortDir: SortDir
-  onSort: (k: SortKey) => void
-  align?: 'left' | 'right'
+  label: string
+  value: string
+  right?: boolean
 }) {
-  const active = sortKey === k
-  const Icon = !active ? ChevronsUpDown : sortDir === 'asc' ? ArrowUp : ArrowDown
   return (
-    <TableHead className={cn(align === 'right' && 'text-right')}>
-      <Button
-        variant="ghost"
-        size="sm"
-        onClick={() => onSort(k)}
-        className={cn(
-          '-ml-2 h-7 px-2',
-          align === 'right' && '-mr-2 ml-auto flex'
-        )}
-      >
-        {children}
-        <Icon className="ml-1 h-3 w-3" />
-      </Button>
-    </TableHead>
+    <div className={cn(right && 'text-right')}>
+      <p className="font-medium tabular-nums">{value}</p>
+      <p className="text-muted-foreground mt-0.5">{label}</p>
+    </div>
   )
 }

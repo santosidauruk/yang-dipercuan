@@ -1,17 +1,9 @@
 'use client'
 
 import { useMemo, useState } from 'react'
-import { Plus, ArrowDownAZ, CalendarArrowDown } from 'lucide-react'
+import { Plus, CalendarArrowDown } from 'lucide-react'
 import { toast } from 'sonner'
 import { Button } from '@/components/ui/button'
-import {
-  DropdownMenu,
-  DropdownMenuCheckboxItem,
-  DropdownMenuContent,
-  DropdownMenuLabel,
-  DropdownMenuSeparator,
-  DropdownMenuTrigger
-} from '@/components/ui/dropdown-menu'
 import {
   Select,
   SelectContent,
@@ -50,7 +42,9 @@ export function PurchasesPageClient() {
   const dividends = useDividends((s) => s.dividends)
 
   const [dialogOpen, setDialogOpen] = useState(false)
-  const [editingData, setEditingData] = useState<Purchase | undefined>(undefined)
+  const [editingData, setEditingData] = useState<Purchase | undefined>(
+    undefined
+  )
   const [filterCodes, setFilterCodes] = useState<string[]>([])
   const [sortKey, setSortKey] = useState<SortKey>('date-desc')
   const [pendingEditPurchase, setPendingEditPurchase] = useState<{
@@ -145,86 +139,65 @@ export function PurchasesPageClient() {
       }
     }
   }
-  const toggleFilter = (code: string) => {
-    setFilterCodes((cur) =>
-      cur.includes(code) ? cur.filter((c) => c !== code) : [...cur, code]
-    )
-  }
 
   return (
-    <div className="space-y-4">
+    <div className="space-y-5">
       <div className="flex items-center justify-between">
         <div>
-          <h1 className="text-2xl font-bold">Purchases</h1>
-          <p className="text-muted-foreground text-sm">
-            Track every buy. Last price + change refresh every 30s.
+          <h1 className="text-3xl font-semibold tracking-tight">Purchases</h1>
+          <p className="text-muted-foreground mt-1 text-sm">
+            Buy records refresh with live prices.
           </p>
         </div>
-        <Button onClick={openAdd}>
+        <Button
+          onClick={openAdd}
+          className="bg-primary text-primary-foreground"
+        >
           <Plus className="h-4 w-4" />
           Add
         </Button>
       </div>
 
-      <div className="flex flex-wrap items-center justify-end gap-2">
+      <div className="grid grid-cols-2 gap-3">
         <CsvActions
           filename={`purchases-${todayISO()}.csv`}
           buildCsv={() => serializePurchases(purchases, { prices })}
           onImport={handleImport}
+          importLabel="Import CSV"
+          exportLabel="Export CSV"
+          className="contents [&_button]:h-11 [&_button]:rounded-lg"
         />
       </div>
 
-      <div className="flex flex-wrap items-center gap-2">
-        <DropdownMenu>
-          <DropdownMenuTrigger asChild>
-            <Button variant="outline" size="sm" disabled={uniqueCodes.length === 0}>
-              <ArrowDownAZ className="h-4 w-4" />
-              Filter
-              {filterCodes.length > 0 && (
-                <span className="ml-1 text-xs">({filterCodes.length})</span>
-              )}
-            </Button>
-          </DropdownMenuTrigger>
-          <DropdownMenuContent align="start">
-            <DropdownMenuLabel>Filter by code</DropdownMenuLabel>
-            <DropdownMenuSeparator />
-            {uniqueCodes.map((code) => (
-              <DropdownMenuCheckboxItem
-                key={code}
-                checked={filterCodes.includes(code)}
-                onCheckedChange={() => toggleFilter(code)}
-                onSelect={(e) => e.preventDefault()}
-              >
-                {code}
-              </DropdownMenuCheckboxItem>
-            ))}
-            {filterCodes.length > 0 && (
-              <>
-                <DropdownMenuSeparator />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  className="w-full justify-start"
-                  onClick={() => setFilterCodes([])}
-                >
-                  Clear
-                </Button>
-              </>
-            )}
-          </DropdownMenuContent>
-        </DropdownMenu>
-
-        <Select
-          value={sortKey}
-          onValueChange={(v) => setSortKey(v as SortKey)}
+      <div className="flex items-center gap-2 overflow-x-auto pb-1">
+        <Button
+          variant={filterCodes.length === 0 ? 'default' : 'outline'}
+          size="sm"
+          className="rounded-full px-4"
+          onClick={() => setFilterCodes([])}
         >
-          <SelectTrigger size="sm" className="w-45">
+          All
+        </Button>
+        {uniqueCodes.map((code) => (
+          <Button
+            key={code}
+            variant={filterCodes.includes(code) ? 'default' : 'outline'}
+            size="sm"
+            className="rounded-full px-4"
+            onClick={() => setFilterCodes([code])}
+          >
+            {code}
+          </Button>
+        ))}
+
+        <Select value={sortKey} onValueChange={(v) => setSortKey(v as SortKey)}>
+          <SelectTrigger size="sm" className="ml-auto w-32 rounded-lg">
             <CalendarArrowDown className="mr-1 h-4 w-4" />
             <SelectValue />
           </SelectTrigger>
           <SelectContent>
-            <SelectItem value="date-desc">Date (newest first)</SelectItem>
-            <SelectItem value="code-asc">Code (A→Z)</SelectItem>
+            <SelectItem value="date-desc">Newest</SelectItem>
+            <SelectItem value="code-asc">Code A-Z</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -257,7 +230,8 @@ export function PurchasesPageClient() {
         }
         confirmLabel="Continue"
         onConfirm={() => {
-          if (pendingEditPurchase) persistUpdate(pendingEditPurchase.id, pendingEditPurchase.values)
+          if (pendingEditPurchase)
+            persistUpdate(pendingEditPurchase.id, pendingEditPurchase.values)
         }}
         onCancel={() => {
           if (pendingEditPurchase) {
@@ -302,9 +276,7 @@ export function PurchasesPageClient() {
         }}
         title="Import failed"
         description={
-          importError ? (
-            <p>{importError}. No rows imported.</p>
-          ) : null
+          importError ? <p>{importError}. No rows imported.</p> : null
         }
         confirmLabel="OK"
         cancelLabel="Close"

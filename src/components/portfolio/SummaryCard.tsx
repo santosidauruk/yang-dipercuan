@@ -23,11 +23,11 @@ export function SummaryCard({ summary }: SummaryCardProps) {
 
   return (
     <Card>
-      <CardContent className="grid gap-4 grid-cols-2">
-        <Stat label="Total Invested" value={formatCurrency(summary.totalInvested)} />
+      <CardContent className="grid grid-cols-2 gap-4">
         <Stat
-          label="Total Current Value"
+          label="Total Market Value"
           value={formatCurrency(summary.totalCurrentValue)}
+          primary
         />
         <Stat
           label="Net Capital Change"
@@ -38,8 +38,16 @@ export function SummaryCard({ summary }: SummaryCardProps) {
               <span className="text-xs">{formatPercentage(netPct)}</span>
             </div>
           }
+          primary
         />
-        <Stat label="Realized Gain" value={formatCurrency(summary.realizedGain)} />
+        <Stat
+          label="Total Invested"
+          value={formatCurrency(summary.totalInvested)}
+        />
+        <Stat
+          label="Realized Gain"
+          value={formatCurrency(summary.realizedGain)}
+        />
         <Stat
           label="Total Dividends"
           value={formatCurrency(summary.totalDividends)}
@@ -52,18 +60,26 @@ export function SummaryCard({ summary }: SummaryCardProps) {
 function Stat({
   label,
   value,
-  testId
+  testId,
+  primary = false
 }: {
   label: string
   value: React.ReactNode
   testId?: string
+  primary?: boolean
 }) {
   return (
-    <div className="space-y-1">
-      <div className="text-muted-foreground text-xs uppercase tracking-wide">
+    <div className={cn('space-y-1', primary && 'col-span-2')}>
+      <div className="text-muted-foreground text-xs tracking-wide uppercase">
         {label}
       </div>
-      <div className="text-lg font-semibold" data-testid={testId}>
+      <div
+        className={cn(
+          'font-semibold tabular-nums',
+          primary ? 'text-2xl' : 'text-lg'
+        )}
+        data-testid={testId}
+      >
         {value}
       </div>
     </div>

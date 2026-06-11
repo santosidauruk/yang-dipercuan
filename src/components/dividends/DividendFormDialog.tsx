@@ -107,7 +107,7 @@ export function DividendFormDialog({
               name="dps"
               render={({ field }) => (
                 <FormItem>
-                  <FormLabel>DPS — Dividend Per Share (IDR)</FormLabel>
+                  <FormLabel>DPS - Dividend Per Share (IDR)</FormLabel>
                   <FormControl>
                     <Input
                       type="number"

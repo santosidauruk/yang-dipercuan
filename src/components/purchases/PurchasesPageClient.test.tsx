@@ -137,6 +137,43 @@ describe('PurchasesPageClient soft-warn on edit causing negative downstream qty'
   })
 })
 
+describe('PurchasesPageClient refreshed list surface', () => {
+  it('renders purchase records as compact row cards with live value context', async () => {
+    usePurchases.setState({
+      purchases: [
+        { id: 'p1', code: 'BBCA', date: '2026-01-16', lots: 10, price: 9000 }
+      ]
+    })
+    fetchMock.mockImplementation(async (url: string) => {
+      const isPrices = url.includes('/api/stocks/prices')
+      return {
+        ok: true,
+        json: async () => (isPrices ? { 'BBCA.JK': 9500 } : [])
+      } as Response
+    })
+
+    renderWithQuery(<PurchasesPageClient />)
+
+    const row = await screen.findByTestId('purchase-row-BBCA')
+    expect(row).toHaveTextContent('BBCA')
+    expect(row).toHaveTextContent('10 Lot')
+    expect(row).toHaveTextContent('Buy price')
+    expect(row).toHaveTextContent('Rp9.000.000')
+    expect(row).toHaveTextContent('Current value')
+    await waitFor(() => {
+      expect(row).toHaveTextContent('Rp9.500.000')
+      expect(row).toHaveTextContent('+5.56%')
+    })
+  })
+
+  it('uses concise refreshed empty state copy', () => {
+    renderWithQuery(<PurchasesPageClient />)
+
+    expect(screen.getByText('No purchase records yet.')).toBeInTheDocument()
+    expect(screen.getByText(/Add your first buy/i)).toBeInTheDocument()
+  })
+})
+
 describe('PurchasesPageClient cascade-delete preview', () => {
   async function setupAndClickDelete() {
     const user = userEvent.setup()

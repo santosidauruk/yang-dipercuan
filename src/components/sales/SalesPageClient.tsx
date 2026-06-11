@@ -104,7 +104,11 @@ export function SalesPageClient() {
   }
 
   const handleDelete = (sale: Sale) => {
-    if (confirm(`Delete sale ${sale.code} on ${sale.date}? This cannot be undone.`)) {
+    if (
+      confirm(
+        `Delete sale ${sale.code} on ${sale.date}? This cannot be undone.`
+      )
+    ) {
       removeSale(sale.id)
       toast.success(`${sale.code} sale deleted`)
     }
@@ -112,7 +116,9 @@ export function SalesPageClient() {
 
   const handleDeleteAll = () => {
     if (sales.length === 0) return
-    if (confirm(`Delete all ${sales.length} sale records? This cannot be undone.`)) {
+    if (
+      confirm(`Delete all ${sales.length} sale records? This cannot be undone.`)
+    ) {
       sales.forEach((s) => removeSale(s.id))
       toast.success('All sales deleted')
     }
@@ -216,7 +222,7 @@ export function SalesPageClient() {
           </SelectTrigger>
           <SelectContent>
             <SelectItem value="date-desc">Date (newest first)</SelectItem>
-            <SelectItem value="code-asc">Code (A→Z)</SelectItem>
+            <SelectItem value="code-asc">Code A-Z</SelectItem>
           </SelectContent>
         </Select>
       </div>
@@ -261,7 +267,9 @@ export function SalesPageClient() {
           if (!open) setImportError(null)
         }}
         title="Import failed"
-        description={importError ? <p>{importError}. No rows imported.</p> : null}
+        description={
+          importError ? <p>{importError}. No rows imported.</p> : null
+        }
         confirmLabel="OK"
         cancelLabel="Close"
         onConfirm={() => setImportError(null)}

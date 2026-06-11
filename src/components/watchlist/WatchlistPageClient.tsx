@@ -5,14 +5,6 @@ import Link from 'next/link'
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
 import { Input } from '@/components/ui/input'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table'
 import { useStockSearch, useStocksQuotes } from '@/hooks/useStocks'
 import { useWatchlist } from '@/stores/useWatchlist'
 import { useStockMeta } from '@/stores/useStockMeta'
@@ -56,11 +48,7 @@ export function WatchlistPageClient() {
   const symbols = useMemo(() => items.map((i) => `${i.code}.JK`), [items])
   const { data: quotes = {} } = useStocksQuotes(symbols)
 
-  const handleSelect = (
-    yahooCode: string,
-    name: string,
-    sector: string
-  ) => {
+  const handleSelect = (yahooCode: string, name: string, sector: string) => {
     const code = bareCode(yahooCode)
     addItem(code)
     setMeta(code, { name, sector })
@@ -70,8 +58,13 @@ export function WatchlistPageClient() {
   }
 
   return (
-    <div className="space-y-4">
-      <h1 className="text-2xl font-bold">Watchlist</h1>
+    <div className="space-y-5">
+      <div>
+        <h1 className="text-3xl font-semibold tracking-tight">Watchlist</h1>
+        <p className="text-muted-foreground mt-1 text-sm">
+          Follow IDX symbols with live price changes.
+        </p>
+      </div>
 
       <div ref={containerRef} className="relative">
         <Input
@@ -87,10 +80,14 @@ export function WatchlistPageClient() {
         {open && debounced.length > 0 && (
           <div className="bg-popover absolute z-50 mt-1 max-h-60 w-full overflow-y-auto rounded-md border shadow-md">
             {isFetching && (
-              <div className="text-muted-foreground p-2 text-sm">Searching…</div>
+              <div className="text-muted-foreground p-2 text-sm">
+                Searching…
+              </div>
             )}
             {!isFetching && visible.length === 0 && (
-              <div className="text-muted-foreground p-2 text-sm">No matches</div>
+              <div className="text-muted-foreground p-2 text-sm">
+                No matches
+              </div>
             )}
             {visible.map((r) => (
               <button
@@ -108,67 +105,75 @@ export function WatchlistPageClient() {
       </div>
 
       {items.length === 0 ? (
-        <div className="text-muted-foreground rounded-md border p-8 text-center text-sm">
-          Search for a stock to add it to your watchlist.
+        <div className="border-border/70 bg-card/70 text-muted-foreground rounded-lg border p-8 text-center text-sm">
+          <p className="text-foreground font-medium">
+            Your watchlist is empty.
+          </p>
+          <p className="mt-1">
+            Search for a stock to add it to your watchlist.
+          </p>
         </div>
       ) : (
-        <div className="overflow-x-auto rounded-md border">
-          <Table>
-            <TableHeader>
-              <TableRow>
-                <TableHead>Code</TableHead>
-                <TableHead>Name</TableHead>
-                <TableHead className="text-right">Last Price</TableHead>
-                <TableHead className="text-right">%Δ today</TableHead>
-                <TableHead className="text-right">Actions</TableHead>
-              </TableRow>
-            </TableHeader>
-            <TableBody>
-              {items.map((item) => {
-                const quote = quotes[`${item.code}.JK`]
-                const price = quote?.price
-                const pct = quote?.changePercent
-                return (
-                  <TableRow
-                    key={item.code}
-                    data-testid={`watchlist-row-${item.code}`}
-                  >
-                    <TableCell>
-                      <Link
-                        href={`/stocks/${item.code}`}
-                        className="font-medium hover:underline"
-                      >
-                        {item.code}
-                      </Link>
-                    </TableCell>
-                    <TableCell>{meta[item.code]?.name ?? '—'}</TableCell>
-                    <TableCell className="text-right">
-                      {price !== undefined ? formatCurrency(price) : '—'}
-                    </TableCell>
-                    <TableCell
-                      className={cn(
-                        'text-right',
-                        pct !== undefined &&
-                          (pct >= 0 ? 'text-green-600' : 'text-red-600')
-                      )}
+        <div className="space-y-2.5">
+          {items.map((item) => {
+            const quote = quotes[`${item.code}.JK`]
+            const price = quote?.price
+            const pct = quote?.changePercent
+            return (
+              <article
+                key={item.code}
+                data-testid={`watchlist-row-${item.code}`}
+                className="border-border/70 bg-card/80 rounded-lg border p-4 shadow-sm shadow-black/5"
+              >
+                <div className="flex items-center justify-between gap-3">
+                  <div className="min-w-0">
+                    <Link
+                      href={`/stocks/${item.code}`}
+                      className="text-xl font-semibold tracking-tight hover:underline"
                     >
-                      {pct !== undefined ? formatPercentage(pct) : '—'}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <Button
-                        variant="ghost"
-                        size="sm"
-                        data-testid={`remove-${item.code}`}
-                        onClick={() => removeItem(item.code)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
-                    </TableCell>
-                  </TableRow>
-                )
-              })}
-            </TableBody>
-          </Table>
+                      {item.code}
+                    </Link>
+                    <p className="text-muted-foreground truncate text-sm">
+                      {meta[item.code]?.name ?? '-'}
+                    </p>
+                  </div>
+                  <Button
+                    variant="outline"
+                    size="icon-sm"
+                    className="text-red-500 hover:text-red-500"
+                    data-testid={`remove-${item.code}`}
+                    onClick={() => removeItem(item.code)}
+                    aria-label={`Remove ${item.code}`}
+                  >
+                    <Trash2 className="h-4 w-4" />
+                  </Button>
+                </div>
+
+                <div className="mt-4 flex items-end justify-between gap-4">
+                  <div>
+                    <p className="font-medium tabular-nums">
+                      {price !== undefined ? formatCurrency(price) : '-'}
+                    </p>
+                    <p className="text-muted-foreground text-sm">Last price</p>
+                  </div>
+                  <div
+                    className={cn(
+                      'rounded-md border px-2.5 py-1 text-sm font-semibold tabular-nums',
+                      pct === undefined && 'text-muted-foreground',
+                      pct !== undefined &&
+                        pct >= 0 &&
+                        'border-emerald-500/30 bg-emerald-500/10 text-emerald-500',
+                      pct !== undefined &&
+                        pct < 0 &&
+                        'border-red-500/30 bg-red-500/10 text-red-500'
+                    )}
+                  >
+                    {pct !== undefined ? formatPercentage(pct) : '-'}
+                  </div>
+                </div>
+              </article>
+            )
+          })}
         </div>
       )}
     </div>

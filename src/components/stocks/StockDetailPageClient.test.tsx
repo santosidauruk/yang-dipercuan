@@ -87,9 +87,7 @@ describe('StockDetailPageClient', () => {
 
     renderPage('BBCA')
 
-    expect(
-      await screen.findByText('Bank Central Asia Tbk')
-    ).toBeInTheDocument()
+    expect(await screen.findByText('Bank Central Asia Tbk')).toBeInTheDocument()
     expect(screen.getByText('Financial Services')).toBeInTheDocument()
 
     const calls = fetchMock.mock.calls.map((c) => c[0] as string)
@@ -130,9 +128,7 @@ describe('StockDetailPageClient', () => {
       })
     })
 
-    expect(
-      await screen.findByText('Bank Central Asia Tbk')
-    ).toBeInTheDocument()
+    expect(await screen.findByText('Bank Central Asia Tbk')).toBeInTheDocument()
     expect(screen.getByText('Financial Services')).toBeInTheDocument()
   })
 
@@ -159,5 +155,47 @@ describe('StockDetailPageClient', () => {
     })
 
     expect(await screen.findByText('Unknown')).toBeInTheDocument()
+  })
+
+  it('groups stock metrics into compact metric tiles', async () => {
+    useStockMeta.setState({
+      meta: {
+        BBCA: { name: 'Bank Central Asia Tbk', sector: 'Financial Services' }
+      }
+    })
+
+    fetchMock.mockImplementation((url: string) => {
+      if (url.startsWith('/api/stocks/BBCA/history')) {
+        return Promise.resolve(new Response('[]', { status: 200 }))
+      }
+      if (url.startsWith('/api/stocks/BBCA')) {
+        return Promise.resolve(
+          new Response(
+            JSON.stringify(
+              stockJson({
+                open: 8950,
+                high: 9100,
+                low: 8900,
+                marketCap: 1_000_000_000
+              })
+            ),
+            { status: 200 }
+          )
+        )
+      }
+      return Promise.resolve(new Response('{}', { status: 200 }))
+    })
+
+    renderPage('BBCA')
+
+    expect(await screen.findByTestId('metric-tile-open')).toHaveTextContent(
+      'Open'
+    )
+    expect(screen.getByTestId('metric-tile-day-range')).toHaveTextContent(
+      'Day range'
+    )
+    expect(screen.getByTestId('metric-tile-market-cap')).toHaveTextContent(
+      'Market cap'
+    )
   })
 })
