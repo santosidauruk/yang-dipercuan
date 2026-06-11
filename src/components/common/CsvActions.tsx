@@ -9,13 +9,19 @@ interface CsvActionsProps {
   buildCsv: () => string
   onImport: (text: string) => void
   disabled?: boolean
+  importLabel?: string
+  exportLabel?: string
+  className?: string
 }
 
 export function CsvActions({
   filename,
   buildCsv,
   onImport,
-  disabled
+  disabled,
+  importLabel = 'Import',
+  exportLabel = 'Export',
+  className
 }: CsvActionsProps) {
   const inputRef = useRef<HTMLInputElement>(null)
 
@@ -36,7 +42,7 @@ export function CsvActions({
   }
 
   return (
-    <div className="flex items-center gap-2">
+    <div className={className ?? 'flex items-center gap-2'}>
       <Button
         variant="outline"
         size="sm"
@@ -44,7 +50,7 @@ export function CsvActions({
         disabled={disabled}
       >
         <Download className="h-4 w-4" />
-        Export
+        {exportLabel}
       </Button>
       <Button
         variant="outline"
@@ -52,7 +58,7 @@ export function CsvActions({
         onClick={() => inputRef.current?.click()}
       >
         <Upload className="h-4 w-4" />
-        Import
+        {importLabel}
       </Button>
       <input
         ref={inputRef}

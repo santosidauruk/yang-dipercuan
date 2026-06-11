@@ -2,15 +2,7 @@
 
 import { Trash2 } from 'lucide-react'
 import { Button } from '@/components/ui/button'
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow
-} from '@/components/ui/table'
-import { formatCompactNumber, formatCurrency, formatPercentage } from '@/lib/utils'
+import { formatCurrency, formatPercentage } from '@/lib/utils'
 import { formatDateDisplay } from '@/lib/date'
 import { dividendRow } from '@/lib/portfolio'
 import type { Dividend, Purchase, Sale } from '@/types'
@@ -30,72 +22,95 @@ export function DividendsTable({
 }: DividendsTableProps) {
   if (dividends.length === 0) {
     return (
-      <div className="text-muted-foreground rounded-md border p-8 text-center text-sm">
-        No dividends yet. Click <span className="font-medium">Add</span> to
-        record your first dividend.
+      <div className="border-border/70 bg-card/70 text-muted-foreground rounded-lg border p-8 text-center text-sm">
+        <p className="text-foreground font-medium">No dividend records yet.</p>
+        <p className="mt-1">Add your first dividend to track income yield.</p>
       </div>
     )
   }
 
   return (
-    <div className="overflow-x-auto rounded-md border">
-      <Table>
-        <TableHeader>
-          <TableRow>
-            <TableHead className="text-center">Tanggal Penerimaan</TableHead>
-            <TableHead className="text-center">Kode Saham</TableHead>
-            <TableHead className="text-center">Harga Beli Rata-Rata</TableHead>
-            <TableHead className="text-center">Jumlah Lot</TableHead>
-            <TableHead className="text-center">Nilai Investasi</TableHead>
-            <TableHead className="text-center">DPS</TableHead>
-            <TableHead className="text-center">Yield %</TableHead>
-            <TableHead className="text-center">Total Dividend</TableHead>
-            <TableHead className="text-center">Aksi</TableHead>
-          </TableRow>
-        </TableHeader>
-        <TableBody>
-          {dividends.map((d) => {
-            const row = dividendRow(purchases, sales, d)
-            const avgCostVal = row.qtyHeld > 0
-              ? row.purchaseValue / (row.qtyHeld * 100)
-              : 0
-            return (
-              <TableRow key={d.id}>
-                <TableCell>{formatDateDisplay(d.date)}</TableCell>
-                <TableCell className="font-medium">{d.code}</TableCell>
-                <TableCell className="text-center">
-                  {avgCostVal > 0 ? formatCurrency(avgCostVal) : '—'}
-                </TableCell>
-                <TableCell className="text-center">{row.qtyHeld}</TableCell>
-                <TableCell className="text-center">
-                  {row.purchaseValue > 0
+    <div className="space-y-2.5">
+      {dividends.map((d) => {
+        const row = dividendRow(purchases, sales, d)
+        const avgCost =
+          row.qtyHeld > 0 ? row.purchaseValue / (row.qtyHeld * 100) : 0
+
+        return (
+          <article
+            key={d.id}
+            data-testid={`dividend-row-${d.code}`}
+            className="border-border/70 bg-card/80 rounded-lg border p-4 shadow-sm shadow-black/5"
+          >
+            <div className="flex items-start justify-between gap-3">
+              <div>
+                <p className="text-muted-foreground text-sm">
+                  {formatDateDisplay(d.date)}
+                </p>
+                <h2 className="mt-2 text-xl font-semibold tracking-tight">
+                  {d.code}
+                </h2>
+                <p className="text-muted-foreground text-sm">
+                  {row.qtyHeld} Lot eligible
+                </p>
+              </div>
+              <div className="rounded-md border border-emerald-500/30 bg-emerald-500/10 px-2.5 py-1 text-sm font-semibold text-emerald-500 tabular-nums">
+                {row.yieldPct > 0 ? formatPercentage(row.yieldPct) : '-'}
+              </div>
+            </div>
+
+            <div className="mt-4 grid grid-cols-2 gap-4 text-sm">
+              <Metric
+                label="Average cost"
+                value={avgCost > 0 ? formatCurrency(avgCost) : '-'}
+              />
+              <Metric label="DPS" value={formatCurrency(d.dps)} right />
+              <Metric
+                label="Invested value"
+                value={
+                  row.purchaseValue > 0
                     ? formatCurrency(row.purchaseValue)
-                    : '—'}
-                </TableCell>
-                <TableCell className="text-center">
-                  {formatCurrency(d.dps)}
-                </TableCell>
-                <TableCell className="text-center">
-                  {row.yieldPct > 0 ? formatPercentage(row.yieldPct) : '—'}
-                </TableCell>
-                <TableCell className="text-center">
-                  {formatCurrency(row.totalDividend)}
-                </TableCell>
-                <TableCell className="text-center">
-                  <Button
-                    variant="ghost"
-                    size="sm"
-                    onClick={() => onDelete(d)}
-                    aria-label="Delete"
-                  >
-                    <Trash2 className="h-4 w-4" />
-                  </Button>
-                </TableCell>
-              </TableRow>
-            )
-          })}
-        </TableBody>
-      </Table>
+                    : '-'
+                }
+              />
+              <Metric
+                label="Total dividend"
+                value={formatCurrency(row.totalDividend)}
+                right
+              />
+            </div>
+
+            <div className="mt-4 flex justify-end">
+              <Button
+                variant="outline"
+                size="icon-sm"
+                className="text-red-500 hover:text-red-500"
+                onClick={() => onDelete(d)}
+                aria-label="Delete"
+              >
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </div>
+          </article>
+        )
+      })}
+    </div>
+  )
+}
+
+function Metric({
+  label,
+  value,
+  right
+}: {
+  label: string
+  value: string
+  right?: boolean
+}) {
+  return (
+    <div className={right ? 'text-right' : undefined}>
+      <p className="font-medium tabular-nums">{value}</p>
+      <p className="text-muted-foreground mt-0.5">{label}</p>
     </div>
   )
 }

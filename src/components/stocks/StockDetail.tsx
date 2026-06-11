@@ -1,7 +1,6 @@
 'use client'
 
 import type { StockDetail as StockDetailType } from '@/types'
-import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card'
 import { Badge } from '@/components/ui/badge'
 import { PriceChange } from '@/components/common/PriceChange'
 import {
@@ -16,11 +15,27 @@ interface StockDetailProps {
   isRefetching: boolean
 }
 
-function MetricRow({ label, value }: { label: string; value: string | null }) {
+function MetricTile({
+  id,
+  label,
+  value,
+  hint
+}: {
+  id: string
+  label: string
+  value: string | null
+  hint?: string
+}) {
   return (
-    <div className="flex justify-between py-1.5 text-sm">
-      <span className="text-muted-foreground">{label}</span>
-      <span className="font-mono font-medium">{value ?? '—'}</span>
+    <div
+      data-testid={`metric-tile-${id}`}
+      className="border-border/70 bg-card/70 rounded-lg border p-3"
+    >
+      <p className="text-muted-foreground text-xs">{label}</p>
+      <p className="mt-1 font-mono text-sm font-semibold tabular-nums">
+        {value ?? '-'}
+      </p>
+      {hint && <p className="text-muted-foreground mt-1 text-xs">{hint}</p>}
     </div>
   )
 }
@@ -46,54 +61,65 @@ export function StockDetailCard({ stock, isRefetching }: StockDetailProps) {
         </div>
       </div>
 
-      {/* Key Metrics */}
-      <Card>
-        <CardHeader className="pb-2">
-          <CardTitle className="text-sm">Key Metrics</CardTitle>
-        </CardHeader>
-        <CardContent className="divide-y">
-          <MetricRow label="Open" value={formatCurrency(stock.open)} />
-          <MetricRow label="High" value={formatCurrency(stock.high)} />
-          <MetricRow label="Low" value={formatCurrency(stock.low)} />
-          <MetricRow
-            label="Prev Close"
+      <section className="space-y-2">
+        <h2 className="text-sm font-semibold">Key metrics</h2>
+        <div className="grid grid-cols-2 gap-2">
+          <MetricTile
+            id="open"
+            label="Open"
+            value={formatCurrency(stock.open)}
+          />
+          <MetricTile
+            id="day-range"
+            label="Day range"
+            value={`${formatCurrency(stock.low)} - ${formatCurrency(
+              stock.high
+            )}`}
+          />
+          <MetricTile
+            id="prev-close"
+            label="Prev close"
             value={formatCurrency(stock.previousClose)}
           />
-          <MetricRow label="Volume" value={formatCompactNumber(stock.volume)} />
-          <MetricRow
-            label="Market Cap"
+          <MetricTile
+            id="volume"
+            label="Volume"
+            value={formatCompactNumber(stock.volume)}
+          />
+          <MetricTile
+            id="market-cap"
+            label="Market cap"
             value={formatCompactNumber(stock.marketCap)}
           />
-          <MetricRow
-            label="P/E Ratio"
+          <MetricTile
+            id="valuation"
+            label="Valuation"
             value={stock.peRatio?.toFixed(2) ?? null}
+            hint={`P/B ${stock.pbRatio?.toFixed(2) ?? '-'}`}
           />
-          <MetricRow
-            label="P/B Ratio"
-            value={stock.pbRatio?.toFixed(2) ?? null}
-          />
-          <MetricRow
-            label="Dividend Yield"
+          <MetricTile
+            id="dividend-yield"
+            label="Dividend yield"
             value={
               stock.dividendYield != null
                 ? formatPercentage(stock.dividendYield)
                 : null
             }
           />
-          <MetricRow
+          <MetricTile
+            id="eps"
             label="EPS"
             value={stock.eps != null ? formatCurrency(stock.eps) : null}
           />
-          <MetricRow
-            label="52W High"
-            value={formatCurrency(stock.fiftyTwoWeekHigh)}
+          <MetricTile
+            id="week-52"
+            label="52W range"
+            value={`${formatCurrency(stock.fiftyTwoWeekLow)} - ${formatCurrency(
+              stock.fiftyTwoWeekHigh
+            )}`}
           />
-          <MetricRow
-            label="52W Low"
-            value={formatCurrency(stock.fiftyTwoWeekLow)}
-          />
-        </CardContent>
-      </Card>
+        </div>
+      </section>
     </div>
   )
 }

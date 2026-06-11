@@ -30,7 +30,7 @@ export function OnboardingGate() {
         <DialogHeader>
           <DialogTitle>Welcome to Granary</DialogTitle>
           <DialogDescription>
-            Track your IDX portfolio locally. No backend, no signup — all data
+            Track your IDX portfolio locally. No backend, no signup - all data
             lives in this browser.
           </DialogDescription>
         </DialogHeader>

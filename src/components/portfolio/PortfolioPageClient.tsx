@@ -95,12 +95,12 @@ export function PortfolioPageClient() {
         </p>
       </div>
       <SummaryCard summary={summary} />
+      <PerformanceChart purchases={purchases} sales={sales} />
       <AllocationDonut
         slices={slices}
         mode={allocMode}
         onModeChange={setAllocMode}
       />
-      <PerformanceChart purchases={purchases} sales={sales} />
       <HoldingsTable
         rows={rows}
         renderDrillDown={(code) => (
